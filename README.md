@@ -92,8 +92,8 @@ Get RisqMap running locally in minutes! 🏃‍♂️
 ### Steps
 1. **Clone the repo**:
    ```bash
-   git clone https://github.com/itsRabb/Floodzy-USA.git
-   cd Floodzy-USA
+   git clone https://github.com/itsRabb/risqmap.git
+   cd RisqMap
    ```
 
 2. **Install dependencies**:
@@ -177,7 +177,7 @@ RisqMap V2 introduces advanced, paid SaaS capabilities for professional users, e
   - Accessibility improvements.
   - New data source integrations.
 
-Stay tuned for updates! Follow our [GitHub Issues](https://github.com/itsRabb/Floodzy-USA/issues) for progress.
+Stay tuned for updates! Follow our [GitHub Issues](https://github.com/itsRabb/risqmap/issues) for progress.
 
 ## 🤝 Contributing
 We welcome contributions! 🌟 Help us make RisqMap even better.
@@ -206,8 +206,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 - **Project Lead**: [itsRabb](https://github.com/itsRabb)
-- **Issues**: [GitHub Issues](https://github.com/itsRabb/Floodzy-USA/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/itsRabb/Floodzy-USA/discussions)
+- **Issues**: [GitHub Issues](https://github.com/itsRabb/risqmap/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/itsRabb/risqmap/discussions)
 - **Email**: (Add contact email if available)
 
 ---
@@ -215,4 +215,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Made with ❤️ for flood-prone communities worldwide. Let's build resilience together!** 🌍💪
 
 *RisqMap - Because every drop counts. 💧*</content>
-<parameter name="filePath">c:\Users\evoga\OneDrive\Desktop\Floodzy-main\README.md
+<parameter name="filePath">c:\Users\evoga\OneDrive\Desktop\risqmap-main\README.md
