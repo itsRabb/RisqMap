@@ -298,6 +298,11 @@ const en = {
         errorMessage: 'An error occurred while fetching data: {message}',
         statistics: {
             title: 'Statistics Dashboard',
+            totalReports: 'Total Reports',
+            highLevel: 'High Level',
+            mediumLevel: 'Medium Level',
+            lowLevel: 'Low Level',
+            avgLevel: 'Average Level',
             tabs: {
                 overview: 'Overview',
                 historical: 'Historical'

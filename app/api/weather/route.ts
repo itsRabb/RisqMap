@@ -12,42 +12,63 @@ export async function GET(request: Request) {
   }
 
   try {
-    // 🚀 NOW USING Open-Meteo FIRST (free, global), then NOAA fallback
-    // Consistent free data with global coverage
+    // 🚀 NOW USING Open-Meteo with comprehensive hourly weather data
+    // Temperature: Fahrenheit, Wind: mph, Precipitation: inch, Timezone: America/Chicago
     const axios = await import('axios');
-    const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&hourly=temperature_2m,precipitation,relativehumidity_2m&timezone=auto`;
+    const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,visibility,evapotranspiration,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,winddirection_10m,windgusts_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch&timeformat=iso8601&timezone=America%2FChicago`;
     const omRes = await axios.default.get(omUrl);
 
-    const current = omRes.data.current_weather ?? null;
+    // Get current hour data (index 0)
+    const hourly = omRes.data.hourly;
+    const currentIdx = 0;
+    const current = hourly ? {
+      temperature: hourly.temperature_2m?.[currentIdx],
+      weathercode: hourly.weathercode?.[currentIdx],
+      windspeed: hourly.windspeed_10m?.[currentIdx],
+      winddirection: hourly.winddirection_10m?.[currentIdx],
+      time: hourly.time?.[currentIdx],
+      humidity: hourly.relativehumidity_2m?.[currentIdx],
+      pressure: hourly.pressure_msl?.[currentIdx] ?? hourly.surface_pressure?.[currentIdx],
+      apparent_temperature: hourly.apparent_temperature?.[currentIdx],
+      visibility: hourly.visibility?.[currentIdx],
+      precipitation_probability: hourly.precipitation_probability?.[currentIdx]
+    } : null;
+
     const daily = (omRes.data.daily && omRes.data.daily.time)
       ? omRes.data.daily.time.map((t: any, i: number) => ({
           dt: t,
           temp_max: omRes.data.daily.temperature_2m_max?.[i],
           temp_min: omRes.data.daily.temperature_2m_min?.[i],
-          precipitation: omRes.data.daily.precipitation_sum?.[i]
+          precipitation: omRes.data.daily.precipitation_sum?.[i],
+          sunrise: omRes.data.daily.sunrise?.[i],
+          sunset: omRes.data.daily.sunset?.[i]
         }))
       : [];
 
-    const hourly = (omRes.data.hourly && omRes.data.hourly.time)
-      ? omRes.data.hourly.time.map((t: any, i: number) => ({ 
+    const hourlyData = (hourly && hourly.time)
+      ? hourly.time.map((t: any, i: number) => ({ 
           timestamp: t, 
-          precipitation: omRes.data.hourly.precipitation?.[i] ?? 0,
-          temperature: omRes.data.hourly.temperature_2m?.[i] ?? 0,
-          windSpeed: 0 // Open-Meteo doesn't provide wind in this endpoint
+          precipitation: hourly.precipitation?.[i] ?? 0,
+          rain: hourly.rain?.[i] ?? 0,
+          temperature: hourly.temperature_2m?.[i] ?? 0,
+          apparent_temperature: hourly.apparent_temperature?.[i] ?? 0,
+          humidity: hourly.relativehumidity_2m?.[i] ?? 0,
+          dewpoint: hourly.dewpoint_2m?.[i] ?? 0,
+          windSpeed: hourly.windspeed_10m?.[i] ?? 0,
+          windDirection: hourly.winddirection_10m?.[i] ?? 0,
+          windGusts: hourly.windgusts_10m?.[i] ?? 0,
+          pressure: hourly.pressure_msl?.[i] ?? 0,
+          visibility: hourly.visibility?.[i] ?? 0,
+          cloudcover: hourly.cloudcover?.[i] ?? 0,
+          weathercode: hourly.weathercode?.[i] ?? 0
         }))
       : [];
 
     return NextResponse.json({
       provider: 'open-meteo',
-      current: {
-        temperature: current?.temperature,
-        weathercode: current?.weathercode,
-        windspeed: current?.windspeed,
-        winddirection: current?.winddirection,
-        time: current?.time
-      },
+      current,
       daily,
-      hourly,
+      hourly: hourlyData,
       alerts: [], // Open-Meteo doesn't provide alerts
       location: null,
       airQuality: null,

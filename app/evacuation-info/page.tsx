@@ -43,8 +43,8 @@ const Popup = dynamic<any>(
   { ssr: false },
 );
 
-const DEFAULT_MAP_CENTER: [number, number] = [39.8283, -98.5795]; // Center of CONUS (United States)
-const DEFAULT_MAP_ZOOM = 10;
+const DEFAULT_MAP_CENTER: [number, number] = [39.8283, -98.5795]; // Center of CONUS (Continental United States)
+const DEFAULT_MAP_ZOOM = 4; // Zoom level to show entire United States
 
 export default function EvacuationInfoPage() {
   const { t, lang } = useLanguage();

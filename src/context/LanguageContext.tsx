@@ -1,24 +1,22 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import id from '../i18n/id';
+import React, { createContext, useContext, ReactNode } from 'react';
 import en from '../i18n/en';
 
-type Language = 'id' | 'en';
-type Translations = typeof id;
+type Language = 'en';
+type Translations = typeof en;
 
 interface LanguageContextProps {
     lang: Language;
-    setLang: (lang: Language) => void;
     t: (key: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-    const [lang, setLang] = useState<Language>('id');
+    const lang: Language = 'en';
 
-    const dictionaries = { id, en };
+    const dictionaries = { en };
 
     const t = (path: string) => {
         const keys = path.split('.');
@@ -35,7 +33,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <LanguageContext.Provider value={{ lang, setLang, t }}>
+        <LanguageContext.Provider value={{ lang, t }}>
             {children}
         </LanguageContext.Provider>
     );

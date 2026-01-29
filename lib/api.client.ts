@@ -142,30 +142,26 @@ export async function fetchWeatherData(
   lon: number,
   apiKey?: string,
 ): Promise<WeatherData> {
-  // Use Open‑Meteo for current weather. Keep the function signature for compatibility
-  // TODO: consider removing apiKey parameter throughout the codebase later.
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,precipitation&temperature_unit=fahrenheit&timezone=auto`;
+  // Use Open‑Meteo hourly endpoint with comprehensive weather variables
+  // Temperature: Fahrenheit, Wind: mph, Precipitation: inch, Timezone: America/Chicago, Time: ISO 8601
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,visibility,evapotranspiration,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,winddirection_10m,windgusts_10m&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch&timeformat=iso8601&timezone=America%2FChicago`;
   try {
     const raw: any = await safeFetch(url, undefined, 'Failed to fetch weather data. Please try again.');
-    // Map Open‑Meteo response to existing WeatherData shape (best-effort)
-    const current = raw?.current_weather || {};
-    // find humidity from hourly arrays if present
-    let humidity = 0;
-    if (raw?.hourly?.time && raw?.hourly?.relativehumidity_2m) {
-      const idx = raw.hourly.time.indexOf(current.time);
-      if (idx >= 0) humidity = raw.hourly.relativehumidity_2m[idx] ?? 0;
-    }
+    // Get the most recent hourly data (index 0 is current hour)
+    const hourly = raw?.hourly || {};
+    const idx = 0; // Current hour
+    
     const mapped: WeatherData = {
-      temperature: Number(current.temperature ?? 0),
-      feelsLike: Number(current.temperature ?? 0), // Open‑Meteo doesn't provide feels_like
-      humidity: Number(humidity ?? 0),
-      pressure: 0, // Pressure not provided by Open‑Meteo current_weather
-      windSpeed: Number(current.windspeed ?? 0),
-      description: mapWeatherCodeToDescription(current.weathercode),
-      icon: mapWeatherCodeToIcon(current.weathercode),
+      temperature: Number(hourly.temperature_2m?.[idx] ?? 0),
+      feelsLike: Number(hourly.apparent_temperature?.[idx] ?? hourly.temperature_2m?.[idx] ?? 0),
+      humidity: Number(hourly.relativehumidity_2m?.[idx] ?? 0),
+      pressure: Number(hourly.pressure_msl?.[idx] ?? hourly.surface_pressure?.[idx] ?? 0),
+      windSpeed: Number(hourly.windspeed_10m?.[idx] ?? 0),
+      description: mapWeatherCodeToDescription(hourly.weathercode?.[idx]),
+      icon: mapWeatherCodeToIcon(hourly.weathercode?.[idx]),
       uvIndex: undefined,
-      rain1h: undefined,
-      dt: undefined,
+      rain1h: Number(hourly.rain?.[idx] ?? 0),
+      dt: hourly.time?.[idx] ? new Date(hourly.time[idx]).getTime() / 1000 : undefined,
     };
     return mapped;
   } catch (error: any) {

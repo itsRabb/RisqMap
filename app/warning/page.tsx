@@ -28,6 +28,9 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+// Import real NOAA alerts
+import { fetchNOAAAlerts } from '@/lib/noaa-alerts';
+
 // Types
 interface Alert {
   id: string;
@@ -49,68 +52,128 @@ interface NewsReport {
   url?: string;
   timestamp: string;
 }
-// --- MOCK DATA POOL ---
-const allMockAlerts: Alert[] = [
-  { id: 'alert-1', level: 'high', location: 'Hudson Weir', timestamp: '10:30', reason: 'Water Surface Level observed at 210 cm (Alert Level 1), rising trend.', severity: 9, affectedAreas: ['Harlem', 'Washington Heights', 'Upper Manhattan'], estimatedPopulation: 14850 },
-  { id: 'alert-2', level: 'medium', location: 'Manhattan Water Gate', timestamp: '10:28', reason: 'Water height elevated (Alert Level 3), discharge increasing from upstream.', severity: 7, affectedAreas: ['Lower Manhattan', 'Tribeca', 'SoHo'], estimatedPopulation: 8230 },
-  { id: 'alert-3', level: 'low', location: 'Queens Monitoring Post', timestamp: '10:25', reason: 'Water level 150 cm (Alert Level 4), current condition stable.', severity: 4, affectedAreas: ['Long Island City', 'Astoria', 'LIC'], estimatedPopulation: 2477 },
-  { id: 'alert-4', level: 'medium', location: 'Bronx Tributary', timestamp: '10:20', reason: 'Significant increase in water discharge following local upstream rain.', severity: 6, affectedAreas: ['Fordham', 'Belmont'], estimatedPopulation: 6150 },
-  { id: 'alert-5', level: 'high', location: 'Coastal Reservoir (sample)', timestamp: '10:15', reason: 'Water pumps activated to reduce local water levels.', severity: 8, affectedAreas: ['Waterfront District', 'Harbor Area', 'Marina District'], estimatedPopulation: 11780 },
-  { id: 'alert-6', level: 'low', location: 'Brooklyn Creek', timestamp: '10:10', reason: 'Strong flow but within safe limits, water height 130 cm.', severity: 3, affectedAreas: ['Park Slope', 'Gowanus'], estimatedPopulation: 1520 },
-  { id: 'alert-7', level: 'high', location: 'Gowanus Canal', timestamp: '10:05', reason: 'Localized overflow starting to inundate adjacent streets, traffic disrupted.', severity: 9, affectedAreas: ['Gowanus', 'Carroll Gardens', 'Red Hook'], estimatedPopulation: 11240 },
-  { id: 'alert-8', level: 'medium', location: 'Jamaica Bay Lowlands', timestamp: '10:00', reason: 'Water height increased 50cm in the last hour; residents advised to be cautious.', severity: 7, affectedAreas: ['Far Rockaway', 'Breezy Point', 'Broad Channel'], estimatedPopulation: 7490 },
-  { id: 'alert-9', level: 'high', location: 'Hudson Bridge Upstream', timestamp: '09:55', reason: 'Heavy upstream rain increased river discharge to Alert Level 2.', severity: 8, affectedAreas: ['Yonkers', 'Mount Vernon', 'New Rochelle'], estimatedPopulation: 9300 },
-  { id: 'alert-10', level: 'low', location: 'East River Tributary', timestamp: '09:50', reason: 'Alert Level 4 status, water level 310 cm. Conditions under control.', severity: 2, affectedAreas: ['Long Island City', 'Astoria'], estimatedPopulation: 3100 },
-  { id: 'alert-11', level: 'medium', location: 'Local Canal', timestamp: '09:45', reason: 'Overflowing points observed in lowland areas.', severity: 6, affectedAreas: ['Civic Center', 'Waterfront'], estimatedPopulation: 5650 },
-  { id: 'alert-12', level: 'high', location: 'Mount Tamalpais, CA', timestamp: '09:40', reason: 'Early warning from NWS: potential for heavy storms and landslides.', severity: 9, affectedAreas: ['Mill Valley', 'Tamalpais', 'Stinson Beach'], estimatedPopulation: 10500 },
-  { id: 'alert-13', level: 'medium', location: 'Local Drainage Channel', timestamp: '09:35', reason: 'Caution water height (Alert Level 3), potential for inundation at underpass.', severity: 7, affectedAreas: ['Chelsea', 'Hudson Yards', 'Hell\'s Kitchen'], estimatedPopulation: 8450 },
-  { id: 'alert-14', level: 'low', location: 'Central City Stream', timestamp: '09:30', reason: 'Flow monitored as normal, no significant increase.', severity: 3, affectedAreas: ['Senen', 'Johar Baru', 'Kemayoran'], estimatedPopulation: 2150 },
-  { id: 'alert-15', level: 'high', location: 'West Flood Canal', timestamp: '09:25', reason: 'Gate opened to discharge water to the estuary. Alert Level 2.', severity: 8, affectedAreas: ['Chelsea', 'Hudson Yards', 'Meatpacking District'], estimatedPopulation: 13200 },
-];
 
 const fetchNewsAndReports = async (): Promise<NewsReport[]> => {
-  const now = new Date();
+  try {
+    // Fetch real weather/disaster news from NewsAPI
+    // Using 'weather', 'flood', 'disaster' keywords for relevant articles
+    const response = await fetch(
+      `https://newsapi.org/v2/everything?q=(weather OR flood OR disaster OR storm OR hurricane) AND (United States OR US)&language=en&sortBy=publishedAt&pageSize=6`,
+      {
+        headers: {
+          'X-Api-Key': process.env.NEXT_PUBLIC_NEWS_API_KEY || '',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.warn('[Warning Page] NewsAPI failed, using fallback');
+      throw new Error('NewsAPI request failed');
+    }
+
+    const data = await response.json();
+    
+    if (data.status === 'ok' && data.articles) {
+      return data.articles
+        .filter((article: any) => article.title && article.url) // Filter out null/removed articles
+        .slice(0, 4) // Limit to 4 articles
+        .map((article: any, index: number) => ({
+          id: `news-${index}`,
+          title: article.title,
+          content: article.description || article.content || 'No description available.',
+          source: article.source?.name || 'News Source',
+          url: article.url,
+          timestamp: article.publishedAt || new Date().toISOString(),
+        }));
+    }
+    
+    throw new Error('No articles found');
+  } catch (error) {
+    console.error('[Warning Page] Error fetching news:', error);
+    // Fallback to NOAA weather stories as backup
     return [
-      { id: 'news-1', title: 'New Orleans Flood: Water Levels Continue to Rise', content: '...', source: 'NOLA.com', url: 'https://www.nola.com/', timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString() },
-      { id: 'news-2', title: 'Magnitude 4.8 Earthquake Shakes San Francisco Area', content: '...', source: 'USGS', url: 'https://earthquake.usgs.gov/', timestamp: new Date(now.getTime() - 5 * 60 * 60 * 1000).toISOString() },
-      { id: 'news-3', title: 'Extreme Weather Early Warning in Gulf Coast', content: '...', source: 'NWS', url: 'https://www.weather.gov/', timestamp: new Date(now.getTime() - 10 * 60 * 60 * 1000).toISOString() },
-      { id: 'news-4', title: 'Mississippi River Discharge Reaches Alert Level 3', content: '...', source: 'NOLA.com', url: 'https://www.nola.com/', timestamp: new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString() },
-  ];
+      { 
+        id: 'news-fallback-1', 
+        title: 'National Weather Service Issues Weather Advisories Across US', 
+        content: 'Real-time weather alerts and forecasts available from the National Weather Service.', 
+        source: 'NOAA/NWS', 
+        url: 'https://www.weather.gov/', 
+        timestamp: new Date().toISOString() 
+      },
+      { 
+        id: 'news-fallback-2', 
+        title: 'USGS Monitors Water Levels Nationwide', 
+        content: 'Access real-time stream flow and water level data from monitoring stations.', 
+        source: 'USGS', 
+        url: 'https://waterdata.usgs.gov/nwis/rt', 
+        timestamp: new Date().toISOString() 
+      },
+    ];
+  }
 };
 
 export default function AlertsPage() {
   const router = useRouter();
 
-  const [alerts, setAlerts] = useState<Alert[]>(() => allMockAlerts.slice(0, 8));
+  const [alerts, setAlerts] = useState<Alert[]>([]);
   const [newsReports, setNewsReports] = useState<NewsReport[]>([]);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [geminiExplanation, setGeminiExplanation] = useState<string | null>(null);
   const [geminiNewsSummary, setGeminiNewsSummary] = useState<{ [key: string]: string }>({});
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isNewsLoading, setIsNewsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [newsError, setNewsError] = useState<string | null>(null);
   const { t, lang } = useLanguage();
 
-  // Real-time alert simulation effect
+  // Fetch real NOAA alerts on component mount and every 5 minutes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setAlerts(currentAlerts => {
-        const newAlerts = [...currentAlerts];
-        const numToReplace = Math.floor(Math.random() * 2) + 2; // Replace 2-3 items
+    const fetchRealAlerts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        console.log('[Warning Page] Fetching real NOAA alerts...');
 
-        for (let i = 0; i < numToReplace; i++) {
-          const randomIndex = Math.floor(Math.random() * newAlerts.length);
-          let newAlert;
-          do {
-            newAlert = allMockAlerts[Math.floor(Math.random() * allMockAlerts.length)];
-          } while (newAlerts.some(a => a.id === newAlert.id)); // Ensure it's a new alert
+        const realAlerts = await fetchNOAAAlerts();
 
-          newAlerts[randomIndex] = { ...newAlert, timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) };
+        // Transform NOAA alerts to our Alert format
+        const transformedAlerts: Alert[] = realAlerts.map(alert => ({
+          id: alert.id,
+          level: alert.level as 'low' | 'medium' | 'high',
+          location: alert.location,
+          timestamp: new Date(alert.timestamp).toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          reason: alert.reason,
+          details: alert.details,
+          affectedAreas: alert.affectedAreas,
+          estimatedPopulation: alert.estimatedPopulation,
+          severity: alert.severity
+        }));
+
+        setAlerts(transformedAlerts);
+        console.log(`[Warning Page] Loaded ${transformedAlerts.length} real alerts`);
+
+        // If no alerts, that's actually good - no active flood warnings
+        if (transformedAlerts.length === 0) {
+          console.log('[Warning Page] No active flood alerts - this is good!');
         }
-        return newAlerts.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-      });
-    }, 60000); // Update every 1 minute
+
+      } catch (err: any) {
+        console.error('[Warning Page] Error fetching real alerts:', err);
+        setError('Failed to load real-time alerts. Please check your connection.');
+        setAlerts([]); // No fallback mock data
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Initial fetch
+    fetchRealAlerts();
+
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchRealAlerts, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -164,14 +227,47 @@ export default function AlertsPage() {
     setError(null);
     setGeminiExplanation(null);
     setSelectedAlert(alert);
-    setSelectedAlert(alert);
-    setTimeout(() => {
+    
+    try {
+      // Call the real Gemini API to get AI analysis
+      const response = await fetch('/api/gemini-alerts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          alertData: {
+            level: alert.level,
+            location: alert.location,
+            timestamp: alert.timestamp,
+            reason: alert.reason,
+            affectedAreas: alert.affectedAreas,
+            estimatedPopulation: alert.estimatedPopulation,
+            severity: alert.severity,
+            requestType: 'alert_analysis'
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch AI analysis');
+      }
+
+      const data = await response.json();
+      setGeminiExplanation(data.analysis || data.answer || t('warnings.analysisResult')
+        .replace('{location}', alert.location)
+        .replace('{reason}', alert.reason)
+        .replace('{areas}', alert.affectedAreas?.join(', ') || ''));
+    } catch (err: any) {
+      console.error('[Warning Page] Error fetching Gemini analysis:', err);
+      // Fallback to template if API fails
       setGeminiExplanation(t('warnings.analysisResult')
         .replace('{location}', alert.location)
         .replace('{reason}', alert.reason)
         .replace('{areas}', alert.affectedAreas?.join(', ') || ''));
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const totalAlerts = alerts.length;

@@ -4,7 +4,7 @@ import { AirPollutionData } from '../types/airPollution';
 export async function getCurrentWeather(latitude: number, longitude: number) {
   // Placeholder implementation using Open‑Meteo for quick US-focused demo.
   // TODO: move mapping to a shared adapter so other parts of the app reuse it.
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=relativehumidity_2m,precipitation&temperature_unit=fahrenheit&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,weathercode,pressure_msl,surface_pressure,cloudcover,visibility,windspeed_10m,winddirection_10m,windgusts_10m&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch&timeformat=iso8601&timezone=America%2FChicago`;
 
   const response = await fetch(url);
   if (!response.ok) {

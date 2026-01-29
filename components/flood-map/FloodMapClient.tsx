@@ -398,6 +398,10 @@ export default function FloodMapClient({
               <Popup>
                 <FloodReportPopup
                   report={report}
+                  onViewDetailsClick={(reportId) => {
+                    // Open detailed view - for now, navigate to flood-map page with report selected
+                    window.open(`/flood-map?reportId=${reportId}`, '_blank');
+                  }}
                 />
               </Popup>
             </Marker>
