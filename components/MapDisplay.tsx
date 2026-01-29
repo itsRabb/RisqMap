@@ -33,9 +33,9 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ latitude, longitude, zoom = 13 
     // Fix for default marker icon issue with Webpack/Vite
     delete ((L as any).Icon.Default.prototype as any)._getIconUrl;
     (L as any).Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-      iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+      iconRetinaUrl: '/leaflet/images/marker-icon-2x.png',
+      iconUrl: '/leaflet/images/marker-icon.png',
+      shadowUrl: '/leaflet/images/marker-shadow.png',
     });
   }, []);
 

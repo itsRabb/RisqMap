@@ -29,6 +29,7 @@ import MapInvalidator from './MapInvalidator'; // Import components to invalidat
 
 
 import ReportFloodModal from './ReportFloodModal';
+import WeatherMapPopup from './WeatherMapPopup';
 
 const EvacuationRouting = dynamic(() => import('@/components/flood-map/EvacuationRouting'), {
   ssr: false,
@@ -72,6 +73,7 @@ interface FloodMapClientProps {
   setIsReporting: (value: boolean) => void; // Added
   shouldOpenReportModal: boolean; // New prop
   setShouldOpenReportModal: (value: boolean) => void; // New prop
+  onReportsUpdate?: () => void; // New prop to refresh reports
 }
 
 // Component to center the map on the selected marker
@@ -100,11 +102,13 @@ export default function FloodMapClient({
   setIsReporting, // Added
   shouldOpenReportModal, // New prop
   setShouldOpenReportModal, // New prop
+  onReportsUpdate, // New prop
 }: FloodMapClientProps) {
   const usPosition: [number, number] = [39.8283, -98.5795]; // Continental US center
   const [mapCenter, setMapCenter] = useState<[number, number]>(usPosition);
   const [reportLocation, setReportLocation] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [weatherPopupCoords, setWeatherPopupCoords] = useState<[number, number] | null>(null);
   const markerRefs = useRef<Map<string, any>>(new Map());
   const [mounted, setMounted] = useState(false); // New state for client-side mount
 
@@ -139,19 +143,75 @@ export default function FloodMapClient({
       setIsModalOpen(true);
       setIsReporting(false); // Exit reporting mode after selecting location
     } else {
+      // Show weather popup for clicked location
+      setWeatherPopupCoords(coords);
       onMapClick(coords);
     }
   }, [isReporting, onMapClick, setIsReporting]); // Added setIsReporting to dependency array
 
-  const handleReportSubmit = useCallback((formData: { waterLevel: number; notes: string; image?: File }) => {
-    console.log("New Flood Report:", {
-      ...formData,
-      location: reportLocation ? [reportLocation.lat, reportLocation.lng] : null,
-    });
-    // TODO: Implement actual submission logic (e.g., API call)
-    setIsModalOpen(false);
-    setReportLocation(null);
-  }, [reportLocation]);
+  const handleReportSubmit = useCallback(async (formData: { waterLevel: number; notes: string; image?: File }) => {
+    if (!reportLocation) {
+      console.error('No report location set');
+      return;
+    }
+
+    try {
+      // Map water level number to enum
+      const mapWaterLevel = (level: number): string => {
+        if (level <= 10) return 'ankle';
+        if (level <= 50) return 'knee';
+        if (level <= 100) return 'thigh';
+        if (level <= 150) return 'waist';
+        return 'above_waist';
+      };
+
+      const reportData = {
+        location: `Lat: ${reportLocation.lat.toFixed(4)}, Lng: ${reportLocation.lng.toFixed(4)}`,
+        latitude: reportLocation.lat,
+        longitude: reportLocation.lng,
+        water_level: mapWaterLevel(formData.waterLevel),
+        description: formData.notes,
+        reporter_name: '', // Optional
+        reporter_contact: '', // Optional
+      };
+
+      // Handle image upload if present
+      if (formData.image) {
+        const formDataUpload = new FormData();
+        formDataUpload.append('file', formData.image);
+        formDataUpload.append('upload_preset', 'flood_reports'); // You'll need to set this up in your cloud storage
+
+        // For now, skip image upload and just submit text data
+        // TODO: Implement image upload to cloud storage and get URL
+        console.log('Image upload not implemented yet, submitting without image');
+      }
+
+      const response = await fetch('/api/report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit report');
+      }
+
+      console.log('Report submitted successfully');
+      setIsModalOpen(false);
+      setReportLocation(null);
+      
+      // Refresh reports
+      if (onReportsUpdate) {
+        onReportsUpdate();
+      }
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      // TODO: Show error toast to user
+    }
+  }, [reportLocation, onReportsUpdate]);
 
   const reportMarkerIcon = useMemo(() => {
     return (L as any).divIcon({
@@ -176,11 +236,9 @@ export default function FloodMapClient({
   const { evacuationIcon, userLocationIcon, getFloodIcon } = useMemo(() => {
     delete ((L as any).Icon.Default.prototype as any)._getIconUrl;
     (L as any).Icon.Default.mergeOptions({
-      iconRetinaUrl:
-        'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-      shadowUrl:
-        'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconRetinaUrl: '/leaflet/images/marker-icon-2x.png',
+      iconUrl: '/leaflet/images/marker-icon.png',
+      shadowUrl: '/leaflet/images/marker-shadow.png',
     });
 
     const baseIconProps = {
@@ -379,6 +437,15 @@ export default function FloodMapClient({
         onSubmit={handleReportSubmit}
         location={reportLocation}
       />
+      {weatherPopupCoords && (
+        <div className="fixed top-4 right-4 z-[1000]">
+          <WeatherMapPopup
+            latitude={weatherPopupCoords[0]}
+            longitude={weatherPopupCoords[1]}
+            onClose={() => setWeatherPopupCoords(null)}
+          />
+        </div>
+      )}
     </>
   );
 }

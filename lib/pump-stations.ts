@@ -243,16 +243,30 @@ function getFallbackPumpStations(limit: number = 50): PumpStation[] {
  * Converts PumpStation to PumpData interface for metrics calculation
  */
 export function transformPumpStationForDisplay(station: PumpStation) {
+  // Map status to building_condition that matches DashboardStats expectations
+  let buildingCondition: string;
+  switch (station.status) {
+    case 'operational':
+    case 'pumping':
+    case 'standby':
+      buildingCondition = 'active';
+      break;
+    case 'maintenance':
+      buildingCondition = 'maintenance';
+      break;
+    case 'offline':
+      buildingCondition = 'offline';
+      break;
+    default:
+      buildingCondition = 'unknown';
+  }
+
   return {
     id: station.id,
     infrastructure_name: station.name,
     latitude: station.latitude,
     longitude: station.longitude,
-    building_condition: station.status === 'operational' || station.status === 'pumping' || station.status === 'standby' 
-      ? 'Good' 
-      : station.status === 'maintenance' 
-      ? 'Under Maintenance' 
-      : 'Poor',
+    building_condition: buildingCondition,
     hydrological_type: station.pumpType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
     infrastructure_type: 'Pump Station',
     province: station.state,

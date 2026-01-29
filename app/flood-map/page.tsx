@@ -127,9 +127,7 @@ const mockEvacuationPoints: EvacuationPoint[] = [
 ];
 
 export default function FloodMapPage() {
-  const [selectedReportId, setSelectedReportId] = useState<string | null>(
-    mockFloodReports.length > 0 ? mockFloodReports[0].id : null,
-  );
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [api, setApi] = useState<CarouselApi>();
   const [isCarouselOpen, setIsCarouselOpen] = useState(true);
   const [isBrowserFullScreen, setIsBrowserFullScreen] = useState(false);
@@ -150,8 +148,43 @@ export default function FloodMapPage() {
   const [isRouting, setIsRouting] = useState(false); // New state
   const [isReporting, setIsReporting] = useState(false); // Added
   const [shouldOpenReportModal, setShouldOpenReportModal] = useState(false);
+  const [realReports, setRealReports] = useState<FloodReport[]>([]);
+  const [isLoadingReports, setIsLoadingReports] = useState(true);
 
   const evacuationPoints = mockEvacuationPoints;
+
+  const fetchReports = async () => {
+    try {
+      const response = await fetch('/api/report');
+      if (response.ok) {
+        const data = await response.json();
+        // Transform API data to match component interface
+        const transformedReports: FloodReport[] = data.map((report: any) => ({
+          id: report.id,
+          position: [report.latitude, report.longitude],
+          timestamp: report.created_at,
+          waterLevel: report.water_level === 'ankle' ? 10 :
+                     report.water_level === 'knee' ? 50 :
+                     report.water_level === 'thigh' ? 100 :
+                     report.water_level === 'waist' ? 150 : 200,
+          locationName: report.location,
+          trend: 'stable', // Default, could be calculated
+          severity: report.severity || 'moderate',
+          imageUrl: report.photo_url,
+          isVerified: report.verified_at ? true : false,
+        }));
+        setRealReports(transformedReports);
+      }
+    } catch (error) {
+      console.error('Failed to fetch reports:', error);
+    } finally {
+      setIsLoadingReports(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   const handleFullScreenToggle = () => {
     if (mapContainerRef.current) {
@@ -172,7 +205,8 @@ export default function FloodMapPage() {
   };
 
   const filteredReports = useMemo(() => {
-    let tempReports = mockFloodReports;
+    // Use real reports if available, otherwise fall back to mock
+    let tempReports = realReports.length > 0 ? realReports : mockFloodReports;
 
     // Apply search query
     if (searchQuery) {
@@ -210,7 +244,7 @@ export default function FloodMapPage() {
     }
 
     return tempReports;
-  }, [searchQuery, filters]);
+  }, [searchQuery, filters, realReports]);
 
   useEffect(() => {
     // If a report was selected, ensure it's still in the filtered list
@@ -353,6 +387,7 @@ export default function FloodMapPage() {
           setIsReporting={setIsReporting} // Pass setIsReporting
           shouldOpenReportModal={shouldOpenReportModal} // New prop
           setShouldOpenReportModal={setShouldOpenReportModal} // New prop
+          onReportsUpdate={fetchReports} // Pass fetch function
         >
           {/* Search Control */}
           <div className="absolute top-[1rem] left-[calc(50%+0.5rem)] -translate-x-1/2 z-[1001] w-[75vw] max-w-sm px-4 md:w-full md:max-w-md">

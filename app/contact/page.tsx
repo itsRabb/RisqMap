@@ -190,7 +190,7 @@ export default function ContactPage() {
                                         disabled={isSubmitting}
                                         className="w-full group relative overflow-hidden bg-transparent border border-[#E1E3E8] hover:border-[#3B82F6] text-white hover:text-[#3B82F6] py-4 transition-all duration-300"
                                     >
-                                        <div className={`absolute inset-0 w-full h-full bg-[#3B82F6] transform ${isSubmitting ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-[2s] ease-linear opacity-10`}></div>
+                                        <div className={`absolute inset-0 w-full h-full bg-[#3B82F6] transform ${isSubmitting ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-2000 ease-linear opacity-10`}></div>
                                         <span className="relative font-mono font-bold tracking-[0.15em] uppercase flex items-center justify-center gap-3">
                                             {isSubmitting ? 'TRANSMITTING...' : 'TRANSMIT REQUEST'}
                                             {!isSubmitting && <Send size={16} className="group-hover:translate-x-1 transition-transform" />}

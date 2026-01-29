@@ -12,83 +12,92 @@ export async function GET(request: Request) {
   }
 
   try {
-    // 🚀 NOW USING OFFICIAL NOAA/NWS WEATHER API!
-    // Official US government weather data with forecasts and alerts
-    const noaaData = await fetchNOAAWeather(parseFloat(lat), parseFloat(lon));
-    
-    // Transform NOAA data to match our existing format
-    const formattedData = {
-      provider: 'NOAA/NWS',
+    // 🚀 NOW USING Open-Meteo FIRST (free, global), then NOAA fallback
+    // Consistent free data with global coverage
+    const axios = await import('axios');
+    const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&hourly=temperature_2m,precipitation,relativehumidity_2m&timezone=auto`;
+    const omRes = await axios.default.get(omUrl);
+
+    const current = omRes.data.current_weather ?? null;
+    const daily = (omRes.data.daily && omRes.data.daily.time)
+      ? omRes.data.daily.time.map((t: any, i: number) => ({
+          dt: t,
+          temp_max: omRes.data.daily.temperature_2m_max?.[i],
+          temp_min: omRes.data.daily.temperature_2m_min?.[i],
+          precipitation: omRes.data.daily.precipitation_sum?.[i]
+        }))
+      : [];
+
+    const hourly = (omRes.data.hourly && omRes.data.hourly.time)
+      ? omRes.data.hourly.time.map((t: any, i: number) => ({ 
+          timestamp: t, 
+          precipitation: omRes.data.hourly.precipitation?.[i] ?? 0,
+          temperature: omRes.data.hourly.temperature_2m?.[i] ?? 0,
+          windSpeed: 0 // Open-Meteo doesn't provide wind in this endpoint
+        }))
+      : [];
+
+    return NextResponse.json({
+      provider: 'open-meteo',
       current: {
-        temperature: noaaData.temperature,
-        weathercode: mapConditionToCode(noaaData.condition),
-        windspeed: noaaData.windSpeed,
-        winddirection: noaaData.windDirection,
-        time: noaaData.timestamp
+        temperature: current?.temperature,
+        weathercode: current?.weathercode,
+        windspeed: current?.windspeed,
+        winddirection: current?.winddirection,
+        time: current?.time
       },
-      daily: noaaData.forecast.slice(0, 7).map(f => ({
-        dt: f.time,
-        temp_max: f.isDaytime ? f.temperature : null,
-        temp_min: !f.isDaytime ? f.temperature : null,
-        precipitation: f.precipProbability,
-        condition: f.condition,
-        description: f.description
-      })),
-      hourly: noaaData.forecast.map(f => ({
-        timestamp: f.time,
-        precipitation: f.precipProbability,
-        temperature: f.temperature,
-        windSpeed: f.windSpeed
-      })),
-      alerts: noaaData.alerts.map(alert => ({
-        event: alert.event,
-        headline: alert.headline,
-        severity: alert.severity,
-        urgency: alert.urgency,
-        areas: alert.areas,
-        expires: alert.expires
-      })),
-      location: noaaData.location,
-      airQuality: null, // TODO: Add EPA AirNow API integration
-    };
-
-    return NextResponse.json(formattedData);
+      daily,
+      hourly,
+      alerts: [], // Open-Meteo doesn't provide alerts
+      location: null,
+      airQuality: null,
+    });
   } catch (err: any) {
-    console.error('NOAA Weather API error:', err?.message || err);
+    console.error('Open-Meteo API error:', err?.message || err);
     
-    // Fallback to Open-Meteo if NOAA fails (coordinates outside US, etc.)
+    // Fallback to NOAA if Open-Meteo fails
     try {
-      const axios = await import('axios');
-      const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&hourly=temperature_2m,precipitation,relativehumidity_2m&timezone=auto`;
-      const omRes = await axios.default.get(omUrl);
+      const noaaData = await fetchNOAAWeather(parseFloat(lat), parseFloat(lon));
+      
+      // Transform NOAA data to match our existing format
+      const formattedData = {
+        provider: 'NOAA/NWS (fallback)',
+        current: {
+          temperature: noaaData.temperature,
+          weathercode: mapConditionToCode(noaaData.condition),
+          windspeed: noaaData.windSpeed,
+          winddirection: noaaData.windDirection,
+          time: noaaData.timestamp
+        },
+        daily: noaaData.forecast.slice(0, 7).map(f => ({
+          dt: f.time,
+          temp_max: f.isDaytime ? f.temperature : null,
+          temp_min: !f.isDaytime ? f.temperature : null,
+          precipitation: f.precipProbability,
+          condition: f.condition,
+          description: f.description
+        })),
+        hourly: noaaData.forecast.map(f => ({
+          timestamp: f.time,
+          precipitation: f.precipProbability,
+          temperature: f.temperature,
+          windSpeed: f.windSpeed
+        })),
+        alerts: noaaData.alerts.map(alert => ({
+          event: alert.event,
+          headline: alert.headline,
+          severity: alert.severity,
+          urgency: alert.urgency,
+          areas: alert.areas,
+          expires: alert.expires
+        })),
+        location: noaaData.location,
+        airQuality: null, // TODO: Add EPA AirNow API integration
+      };
 
-      const current = omRes.data.current_weather ?? null;
-      const daily = (omRes.data.daily && omRes.data.daily.time)
-        ? omRes.data.daily.time.map((t: any, i: number) => ({
-            dt: t,
-            temp_max: omRes.data.daily.temperature_2m_max?.[i],
-            temp_min: omRes.data.daily.temperature_2m_min?.[i],
-            precipitation: omRes.data.daily.precipitation_sum?.[i]
-          }))
-        : [];
-
-      const hourly = (omRes.data.hourly && omRes.data.hourly.time)
-        ? omRes.data.hourly.time.map((t: any, i: number) => ({ 
-            timestamp: t, 
-            precipitation: omRes.data.hourly.precipitation?.[i] ?? 0 
-          }))
-        : [];
-
-      return NextResponse.json({
-        provider: 'open-meteo (fallback)',
-        current,
-        daily,
-        hourly,
-        alerts: [],
-        airQuality: null,
-      });
+      return NextResponse.json(formattedData);
     } catch (fallbackErr: any) {
-      console.error('Open-Meteo fallback also failed:', fallbackErr?.message);
+      console.error('NOAA fallback also failed:', fallbackErr?.message);
       return NextResponse.json({ error: 'Failed to fetch weather data from all sources.' }, { status: 500 });
     }
   }
