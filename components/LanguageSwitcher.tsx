@@ -12,22 +12,19 @@ import {
 import { Button } from '@/components/ui/Button';
 
 export default function LanguageSwitcher() {
-    const { lang, setLang } = useLanguage();
+    const { lang } = useLanguage();
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9">
                     <Globe className="h-[1.2rem] w-[1.2rem]" />
-                    <span className="sr-only">Toggle language</span>
+                    <span className="sr-only">Language</span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setLang('id')} className={lang === 'id' ? 'bg-accent font-medium' : ''}>
-                    United States
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLang('en')} className={lang === 'en' ? 'bg-accent font-medium' : ''}>
-                    English
+                <DropdownMenuItem className="bg-accent font-medium cursor-default">
+                    English (US)
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

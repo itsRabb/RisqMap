@@ -155,9 +155,6 @@ export default function AlertsPage() {
                     alert.level === 'danger' ? 8 : 
                     alert.level === 'warning' ? 5 : 3
         }));
-          estimatedPopulation: alert.estimatedPopulation,
-          severity: alert.severity
-        }));
 
         setAlerts(transformedAlerts);
         console.log(`[Warning Page] Loaded ${transformedAlerts.length} real alerts`);

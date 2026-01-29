@@ -157,7 +157,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
           `"${report.description ? report.description.replace(/"/g, '""') : ''}"`,
           `"${report.reporter_name ? report.reporter_name.replace(/"/g, '""') : ''}"`,
           `"${report.reporter_contact ? report.reporter_contact.replace(/"/g, '""') : ''}"`,
-          `"${format(parseISO(report.created_at), 'dd MMM yyyy, HH:mm', { locale: lang === 'id' ? id : enUS })}"`
+          `"${format(parseISO(report.created_at), 'dd MMM yyyy, HH:mm', { locale: enUS })}"`
         ].join(',')
       )
     ].join('\n');
@@ -385,7 +385,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                             <div className="flex items-center space-x-4 text-sm text-slate-500 dark:text-gray-400 mb-2">
                               <div className="flex items-center space-x-1">
                                 <Clock className="h-3 w-3" />
-                                <span>{format(parseISO(report.created_at), 'dd MMM yyyy, HH:mm', { locale: lang === 'id' ? id : enUS })}</span>
+                                <span>{format(parseISO(report.created_at), 'dd MMM yyyy, HH:mm', { locale: enUS })}</span>
                               </div>
                               {report.reporter_name && (
                                 <div className="flex items-center space-x-1">
