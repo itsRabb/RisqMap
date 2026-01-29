@@ -144,6 +144,20 @@ export function DashboardClientPage({ initialData }) {
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const mobileMapRef = useRef<any | null>(null);
 
+  // Initialize with Chicago as default location if no location is set
+  useEffect(() => {
+    if (!selectedLocation) {
+      const chicagoLocation: SelectedLocation = {
+        districtName: 'Chicago',
+        latitude: 41.8781,
+        longitude: -87.6298,
+        provinceName: 'Illinois',
+        regencyName: 'Cook County',
+      };
+      setSelectedLocation(chicagoLocation);
+    }
+  }, []); // Only run on mount
+
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isDashboardMapFullscreen) {
@@ -548,7 +562,7 @@ export function DashboardClientPage({ initialData }) {
             {/* Additional Light Mode Overlay for readability if image is dark */}
             <div className="absolute inset-0 bg-white/10 dark:bg-transparent mix-blend-overlay z-10" />
           </div>
-          
+
           <div className="relative z-10 container mx-auto px-4 sm:px-6 py-20 md:py-28">
             <motion.div
               initial={{ opacity: 0, y: 30 }}

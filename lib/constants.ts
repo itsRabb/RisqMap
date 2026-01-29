@@ -4,8 +4,9 @@ export const USA_BOUNDS: [[number, number], [number, number]] = [
   [49.384358, -66.885444], // Northeast
 ];
 
-export const DEFAULT_MAP_CENTER: [number, number] = [39.8283, -98.5795]; // Continental US center
-export const DEFAULT_MAP_ZOOM = 5;
+// Default to Chicago - major flood monitoring hub with TARP infrastructure
+export const DEFAULT_MAP_CENTER: [number, number] = [41.8781, -87.6298]; // Chicago, IL
+export const DEFAULT_MAP_ZOOM = 10; // Zoom level to see city details
 
 export const FLOOD_RISK_COLORS = {
   low: '#10B981', // Green
