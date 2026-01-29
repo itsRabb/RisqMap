@@ -48,6 +48,7 @@ import { toast } from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
 import { MapControls } from './MapControls';
 import { MapLegend } from './MapLegend';
+import WeatherMapPopup from '../flood-map/WeatherMapPopup';
 import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
@@ -171,13 +172,15 @@ function MapUpdater({ center, zoom }: MapUpdaterProps) {
 interface MapEventsProps {
   onLocationSelect: (latlng: any) => void;
   onReverseGeocode: (latlng: any, locationName: GeocodingResponse) => void;
+  onWeatherPopup: (coords: [number, number]) => void;
 }
 
-function MapEvents({ onLocationSelect, onReverseGeocode }: MapEventsProps) {
+function MapEvents({ onLocationSelect, onReverseGeocode, onWeatherPopup }: MapEventsProps) {
   useMapEvents({
     click: async (e) => {
       const { lat, lng } = e.latlng;
       onLocationSelect(e.latlng);
+      onWeatherPopup([lat, lng]);
       const locationName = await getLocationNameByCoords(lat, lng);
       if (locationName) {
         onReverseGeocode(e.latlng, locationName);
@@ -283,8 +286,17 @@ export const FloodMap = React.memo(function FloodMap({
   const weatherTileLayerUrl = propWeatherTileLayerUrl; // Assign to a local variable
   const [selectedLayer, setSelectedLayer] = useState('street');
   const [weatherTileUrl, setWeatherTileUrl] = useState<string | null>(null); // NEW: weatherTileUrl state
+  const [weatherPopupCoords, setWeatherPopupCoords] = useState<[number, number] | null>(null);
 
   useEffect(() => {
+    // Fix for default marker icon issue
+    delete ((L as any).Icon.Default.prototype as any)._getIconUrl;
+    (L as any).Icon.Default.mergeOptions({
+      iconRetinaUrl: '/leaflet/images/marker-icon-2x.png',
+      iconUrl: '/leaflet/images/marker-icon.png',
+      shadowUrl: '/leaflet/images/marker-shadow.png',
+    });
+
     if (activeLayer && typeof activeLayer === 'string') {
       const url = `/api/weather/tiles/${activeLayer}/{z}/{x}/{y}`;
       setWeatherTileUrl(url);
@@ -588,6 +600,7 @@ export const FloodMap = React.memo(function FloodMap({
         <MapEvents
           onLocationSelect={onLocationSelect || (() => {})}
           onReverseGeocode={handleMapClick}
+          onWeatherPopup={setWeatherPopupCoords}
         />
         {onMapBoundsChange && <MapBoundsUpdater onMapBoundsChange={onMapBoundsChange} />}
 
@@ -1126,6 +1139,16 @@ export const FloodMap = React.memo(function FloodMap({
       {/* Map Legend */}
       <MapLegend />
 
+      {/* Weather Popup */}
+      {weatherPopupCoords && (
+        <div className="fixed top-4 right-4 z-[1000]">
+          <WeatherMapPopup
+            latitude={weatherPopupCoords[0]}
+            longitude={weatherPopupCoords[1]}
+            onClose={() => setWeatherPopupCoords(null)}
+          />
+        </div>
+      )}
       
     </motion.div>
   );

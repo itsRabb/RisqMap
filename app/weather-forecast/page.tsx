@@ -736,15 +736,11 @@ export default function WeatherForecastPage() {
             </div>
             <div className="flex items-center space-x-2">
               <Badge
-                variant={API_KEY ? 'success' : 'danger'}
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${API_KEY ? 'bg-green-600/20 text-green-400 border-green-500/30' : 'bg-red-600/20 text-red-400 border-red-500/30'}`}
+                variant="success"
+                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border bg-green-600/20 text-green-400 border-green-500/30"
               >
-                {API_KEY ? (
-                  <Wifi className="w-3 h-3 mr-1.5" />
-                ) : (
-                  <AlertTriangle className="w-3 h-3 mr-1.5" />
-                )}
-                {API_KEY ? t('weather.statusOnline') : t('weather.statusError')}
+                <Wifi className="w-3 h-3 mr-1.5" />
+                {t('weather.statusOnline')}
               </Badge>
               <Button
                 variant="ghost"
@@ -930,32 +926,16 @@ export default function WeatherForecastPage() {
                 <div
                   className={`${isMapFullscreen ? 'h-screen' : 'h-[500px] lg:h-[calc(100vh-140px)]'} bg-slate-900`}
                 >
-                  {API_KEY ? (
-                    <>
-                      <WeatherMap
-                        key={isMapFullscreen ? 'fullscreen' : 'normal'}
-                        center={currentMapCenter}
-                        zoom={currentMapZoom}
-                        weatherLayers={weatherLayers}
-                        selectedLocation={selectedLocation}
-                        apiKey={API_KEY}
-                        onToggleLayer={toggleWeatherLayer}
-                        currentWeatherData={rawWeatherData}
-                      />
-                    </>
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-center p-4">
-                      <Alert
-                        variant="destructive"
-                        className="p-4 rounded-xl border bg-red-900/20 border-red-500/50 text-red-400"
-                      >
-                        <AlertTriangle className="w-4 h-4" />
-                        <AlertDescription className="text-sm">
-                          {t('weather.invalidApiKey')}
-                        </AlertDescription>
-                      </Alert>
-                    </div>
-                  )}
+                  <WeatherMap
+                    key={isMapFullscreen ? 'fullscreen' : 'normal'}
+                    center={currentMapCenter}
+                    zoom={currentMapZoom}
+                    weatherLayers={weatherLayers}
+                    selectedLocation={selectedLocation}
+                    apiKey={API_KEY}
+                    onToggleLayer={toggleWeatherLayer}
+                    currentWeatherData={rawWeatherData}
+                  />
                 </div>
               </CardContent>
             </Card>
