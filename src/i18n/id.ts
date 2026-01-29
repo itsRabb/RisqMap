@@ -273,12 +273,83 @@ const id = {
         errorTitle: 'Failed to Load Report Data',
         errorMessage: 'An error occurred while fetching data: {message}',
         statistics: {
-            title: 'Data Statistics',
-            totalReports: 'Total Reports',
-            highLevel: 'High Level (Waist Deep/More)',
-            mediumLevel: 'Medium Level (Knee Deep/Thigh Deep)',
-            lowLevel: 'Low Level (Ankle Deep)',
-            avgLevel: 'Average Level'
+            title: 'Dasbor Statistik',
+            tabs: {
+                overview: 'Ringkasan',
+                historical: 'Historis'
+            },
+            filters: {
+                button: 'Filter',
+                startDate: 'Tanggal Mulai',
+                endDate: 'Tanggal Akhir'
+            }
+        },
+        Statistics: {
+            overview: {
+                title: 'Ringkasan Statistik Bencana',
+                realTime: 'Langsung',
+                subtitle: 'Pemantauan bencana real-time dan statistik',
+                stats: {
+                    totalIncidents: 'Total Insiden',
+                    descTotalIncidents: 'Total insiden bencana yang dilaporkan',
+                    evacuees: 'Pengungsi',
+                    descEvacuees: 'Orang yang dievakuasi dari daerah terdampak',
+                    casualties: 'Korban',
+                    descCasualties: 'Korban jiwa dan luka yang dilaporkan',
+                    damagedInfra: 'Infrastruktur Rusak',
+                    descDamagedInfra: 'Unit infrastruktur yang terdampak',
+                    affectedAreas: 'Daerah Terpengaruh',
+                    descAffectedAreas: 'Daerah geografis yang terdampak',
+                    preparedness: 'Tingkat Kesiapsiagaan',
+                    descPreparedness: 'Persentase kesiapsiagaan masyarakat'
+                },
+                charts: {
+                    trendTitle: 'Tren Insiden',
+                    trendSubtitle: 'Pola insiden bulanan',
+                    incidents: 'Insiden',
+                    severity: 'Tingkat Keparahan',
+                    distributionTitle: 'Distribusi Bencana',
+                    distributionSubtitle: 'Jenis bencana yang dilaporkan'
+                },
+                aiInsights: {
+                    title: 'Wawasan Bertenaga AI',
+                    subtitle: 'Analitik dan prediksi canggih',
+                    poweredBy: 'Didukung oleh Gemini AI',
+                    cards: {
+                        trend: {
+                            title: 'Analisis Tren',
+                            desc: 'Tren insiden dari waktu ke waktu',
+                            tag: 'Analitik'
+                        },
+                        risk: {
+                            title: 'Penilaian Risiko',
+                            desc: 'Zona berisiko tinggi teridentifikasi',
+                            tag: 'Risiko'
+                        },
+                        education: {
+                            title: 'Dampak Pendidikan',
+                            desc: 'Fasilitas pendidikan terpengaruh',
+                            tag: 'Pendidikan'
+                        },
+                        integration: {
+                            title: 'Integrasi Sistem',
+                            desc: 'Efisiensi integrasi data',
+                            tag: 'Integrasi'
+                        }
+                    },
+                    buttons: {
+                        analyze: 'Analisis Data',
+                        export: 'Ekspor Laporan'
+                    }
+                }
+            },
+            types: {
+                flood: 'Banjir',
+                earthquake: 'Gempa Bumi',
+                landslide: 'Tanah Longsor',
+                tsunami: 'Tsunami',
+                other: 'Lainnya'
+            }
         },
         charts: {
             mostVulnerable: 'Most Vulnerable Locations',

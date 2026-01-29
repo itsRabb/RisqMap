@@ -297,12 +297,83 @@ const en = {
         errorTitle: 'Failed to Load Report Data',
         errorMessage: 'An error occurred while fetching data: {message}',
         statistics: {
-            title: 'Data Statistics',
-            totalReports: 'Total Reports',
-            highLevel: 'Danger Level (Navel/Above)',
-            mediumLevel: 'Warning Level (Knee/Thigh)',
-            lowLevel: 'Normal Level (Ankle)',
-            avgLevel: 'Average Level'
+            title: 'Statistics Dashboard',
+            tabs: {
+                overview: 'Overview',
+                historical: 'Historical'
+            },
+            filters: {
+                button: 'Filters',
+                startDate: 'Start Date',
+                endDate: 'End Date'
+            }
+        },
+        Statistics: {
+            overview: {
+                title: 'Disaster Statistics Overview',
+                realTime: 'Live',
+                subtitle: 'Real-time disaster monitoring and statistics',
+                stats: {
+                    totalIncidents: 'Total Incidents',
+                    descTotalIncidents: 'Total reported disaster incidents',
+                    evacuees: 'Evacuees',
+                    descEvacuees: 'People evacuated from affected areas',
+                    casualties: 'Casualties',
+                    descCasualties: 'Reported casualties and injuries',
+                    damagedInfra: 'Damaged Infrastructure',
+                    descDamagedInfra: 'Infrastructure units affected',
+                    affectedAreas: 'Affected Areas',
+                    descAffectedAreas: 'Geographic areas impacted',
+                    preparedness: 'Preparedness Level',
+                    descPreparedness: 'Community preparedness percentage'
+                },
+                charts: {
+                    trendTitle: 'Incident Trends',
+                    trendSubtitle: 'Monthly incident patterns',
+                    incidents: 'Incidents',
+                    severity: 'Severity',
+                    distributionTitle: 'Disaster Distribution',
+                    distributionSubtitle: 'Types of disasters reported'
+                },
+                aiInsights: {
+                    title: 'AI-Powered Insights',
+                    subtitle: 'Advanced analytics and predictions',
+                    poweredBy: 'Powered by Gemini AI',
+                    cards: {
+                        trend: {
+                            title: 'Trend Analysis',
+                            desc: 'Incident trends over time',
+                            tag: 'Analytics'
+                        },
+                        risk: {
+                            title: 'Risk Assessment',
+                            desc: 'High-risk zones identified',
+                            tag: 'Risk'
+                        },
+                        education: {
+                            title: 'Education Impact',
+                            desc: 'Educational facilities affected',
+                            tag: 'Education'
+                        },
+                        integration: {
+                            title: 'System Integration',
+                            desc: 'Data integration efficiency',
+                            tag: 'Integration'
+                        }
+                    },
+                    buttons: {
+                        analyze: 'Analyze Data',
+                        export: 'Export Report'
+                    }
+                }
+            },
+            types: {
+                flood: 'Flood',
+                earthquake: 'Earthquake',
+                landslide: 'Landslide',
+                tsunami: 'Tsunami',
+                other: 'Other'
+            }
         },
         charts: {
             mostVulnerable: 'Most Vulnerable Locations',
