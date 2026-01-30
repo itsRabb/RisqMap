@@ -29,10 +29,7 @@ const DynamicMapPicker = dynamic(
 import { motion } from 'framer-motion'; // Import motion
 import Image from 'next/image';
 
-import { useLanguage } from '@/src/context/LanguageContext';
-
 export default function FloodReportPage() {
-  const { t } = useLanguage();
   // --- STATE MANAGEMENT ---
   const [location, setLocation] = useState<string>('');
   const [manualLocationInput, setManualLocationInput] = useState<string>(''); // New state for manual input
@@ -111,10 +108,10 @@ if (data && data.length > 0) {
         setLatitude(parseFloat(lat));
         setLongitude(parseFloat(lon));
         setLocation(display_name);
-        setMessage(t('reportFlood.locationFound'));
+        setMessage('Location found');
         setMessageType('success');
       } else {
-        setMessage(t('reportFlood.locationNotFound'));
+        setMessage('Location not found');
         setMessageType('error');
       }
     } catch (error: any) {
@@ -164,7 +161,7 @@ if (data && data.length > 0) {
 
     if (!validationResult.success) {
       setErrors(validationResult.error.issues);
-      setMessage(t('reportFlood.validationError'));
+      setMessage('Please fill in all required fields');
       setMessageType('error');
       setLoading(false);
       return;
@@ -230,9 +227,9 @@ if (!predictionResponse.ok) {
 
       // Map API risk labels to more descriptive, user-friendly strings for display
       const riskLabelMap: { [key: string]: string } = {
-        'HIGH': t('reportFlood.riskHigh'),
-        'MED': t('reportFlood.riskMedium'),
-        'LOW': t('reportFlood.riskLow'),
+        'HIGH': 'High Risk',
+        'MED': 'Medium Risk',
+        'LOW': 'Low Risk',
       };
 
       // Use the map to get the descriptive label, with a fallback to the original label
@@ -241,7 +238,7 @@ if (!predictionResponse.ok) {
       // Set the descriptive label for display in the UI
       setPredictionRiskLabel(descriptiveRiskLabel);
 
-      setMessage(t('reportFlood.success'));
+      setMessage('Flood report submitted successfully!');
       setMessageType('success');
 
       let photoUrl = '';
@@ -336,8 +333,8 @@ if (!predictionResponse.ok) {
             <Droplets className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{t('common.risqmap')}</h1>
-            <p className="text-xs sm:text-sm text-cyan-600 dark:text-cyan-400">{t('reportFlood.subtitle')}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">RisqMap</h1>
+            <p className="text-xs sm:text-sm text-cyan-600 dark:text-cyan-400">Community Flood Reporting System</p>
           </div>
         </div>
         <motion.div
@@ -348,10 +345,10 @@ if (!predictionResponse.ok) {
         >
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="w-5 h-5 text-orange-500 dark:text-orange-400" />
-            <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">{t('reportFlood.title')}</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Report Flood</h2>
           </div>
           <p className="text-slate-600 dark:text-slate-400">
-            {t('reportFlood.formDesc')}
+            Help us monitor flood conditions in your area
           </p>
         </motion.div>
       </motion.div>
@@ -384,8 +381,8 @@ if (!predictionResponse.ok) {
                   </div>
                   {predictionResult !== null && predictionRiskLabel !== null && messageType === 'success' && (
                     <div className="mt-2 text-sm">
-                      <p>{t('reportFlood.predictionRisk')}: <span className="font-bold">{predictionRiskLabel}</span></p>
-                      <p>{t('reportFlood.predictionProb')}: <span className="font-bold">{(predictionResult * 100).toFixed(2)}%</span></p>
+                      <p>Risk Level: <span className="font-bold">{predictionRiskLabel}</span></p>
+                      <p>Probability: <span className="font-bold">{(predictionResult * 100).toFixed(2)}%</span></p>
                     </div>
                   )}
                 </motion.div>
@@ -399,7 +396,7 @@ if (!predictionResponse.ok) {
               >
                 <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
                   <MapPin className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                  {t('reportFlood.location')} <span className="text-red-500 dark:text-red-400">*</span>
+                  Location <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <DynamicMapPicker
                   currentPosition={[latitude, longitude]} // Pass current lat/lng
@@ -421,7 +418,7 @@ if (!predictionResponse.ok) {
                         handleSearchLocation();
                       }
                     }}
-                    placeholder={t('reportFlood.locationPlaceholder')}
+                    placeholder="Enter location manually"
                     className={`w-full bg-slate-50 dark:bg-slate-700/80 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 pr-12 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:border-cyan-500 dark:focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 dark:focus:ring-cyan-400/20 transition-all ${getErrorMessage('location') ? 'border-red-500' : 'border-slate-300 dark:border-slate-500/50'}`}
                   />
                   <button
@@ -443,7 +440,7 @@ if (!predictionResponse.ok) {
                   <p className="text-red-400 text-xs mt-1">{getErrorMessage('longitude')}</p>
                 )}
                 <p className="text-xs text-slate-500">
-                  {t('reportFlood.mapHint')}
+                  Click on the map to select a location or enter it manually
                 </p>
               </motion.div>
 {/* Water Level */}
@@ -455,7 +452,7 @@ if (!predictionResponse.ok) {
               >
                 <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
                   <Droplets className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  {t('reportFlood.waterLevel')} <span className="text-red-500 dark:text-red-400">*</span>
+                  Water Level <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <div className={`grid grid-cols-1 sm:grid-cols-2 gap-2 ${getErrorMessage('water_level') ? 'border border-red-500 rounded-lg p-2' : ''}`}>
                   {waterLevelOptions.map((option) => (
@@ -475,7 +472,7 @@ if (!predictionResponse.ok) {
                           <span
                             className={`text-sm sm:text-base font-medium ${waterLevel === option.value ? 'text-cyan-700 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}
                           >
-                            {t(`reportFlood.waterLevelOptions.${option.value}`)}
+                            {option.label}
                           </span>
                           <span className={`text-xs sm:text-sm ${option.color}`}>
                             {option.height}
@@ -498,7 +495,7 @@ if (!predictionResponse.ok) {
               >
                 <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
                   <Camera className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 dark:text-green-400" />
-                  {t('reportFlood.photo')}
+                  Upload Photo
                 </label>
                 <div className="relative">
                   <input
@@ -526,7 +523,7 @@ if (!predictionResponse.ok) {
                             {selectedPhoto.file.name}
                           </p>
                           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                            {t('reportFlood.photoChange')}
+                            Click to change photo
                           </p>
                         </div>
                       </div>
@@ -534,10 +531,10 @@ if (!predictionResponse.ok) {
                       <div className="text-center">
                         <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400 mx-auto mb-2" />
                         <p className="text-slate-500 dark:text-slate-400">
-                          {t('reportFlood.photoPlaceholder')}
+                          Click to upload a photo
                         </p>
                         <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-500">
-                          {t('reportFlood.photoFormats')}
+                          PNG, JPG, GIF up to 10MB
                         </p>
                       </div>
                     )}
@@ -553,10 +550,10 @@ if (!predictionResponse.ok) {
                 className="space-y-2"
               >
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {t('reportFlood.descLabel')}
+                  Description
                 </label>
                 <textarea
-                  placeholder={t('reportFlood.descPlaceholder')}
+                  placeholder="Describe the flood situation..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
@@ -576,11 +573,11 @@ if (!predictionResponse.ok) {
               >
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
-                    <User className="w-4 h-4 text-purple-600 dark:text-purple-400" /> {t('reportFlood.reporterName')}
+                    <User className="w-4 h-4 text-purple-600 dark:text-purple-400" /> Reporter Name
                   </label>
                   <input
                     type="text"
-                    placeholder={t('reportFlood.reporterName')}
+                    placeholder="Reporter Name"
                     value={reporterName}
                     onChange={(e) => setReporterName(e.target.value)}
                     className={`w-full bg-slate-50 dark:bg-slate-700/50 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:border-cyan-500 dark:focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 dark:focus:ring-cyan-400/20 transition-all ${getErrorMessage('reporter_name') ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'}`}
@@ -591,11 +588,11 @@ if (!predictionResponse.ok) {
                 </div>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
-                    <Phone className="w-4 h-4 text-orange-500 dark:text-orange-400" /> {t('reportFlood.reporterContact')}
+                    <Phone className="w-4 h-4 text-orange-500 dark:text-orange-400" /> Reporter Contact
                   </label>
                   <input
                     type="text"
-                    placeholder={t('reportFlood.reporterContact')}
+                    placeholder="Reporter Contact"
                     value={reporterContact}
                     onChange={(e) => setReporterContact(e.target.value)}
                     className={`w-full bg-slate-50 dark:bg-slate-700/50 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:border-cyan-500 dark:focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 dark:focus:ring-cyan-400/20 transition-all ${getErrorMessage('reporter_contact') ? 'border-red-500' : 'border-slate-300 dark:border-slate-600'}`}
@@ -618,11 +615,11 @@ if (!predictionResponse.ok) {
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />{' '}
-                    {t('reportFlood.submitting')}
+                    Submitting...
                   </>
                 ) : (
                   <>
-                    <Send className="w-5 h-5" /> {t('reportFlood.submitButton')}
+                    <Send className="w-5 h-5" /> Submit Report
                   </>
                 )}
               </motion.button>
@@ -640,13 +637,13 @@ if (!predictionResponse.ok) {
           >
             <div className="flex items-center gap-2 mb-3">
               <Clock className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-              <h3 className="text-base sm:text-lg font-medium text-slate-900 dark:text-white">{t('reportFlood.timeTitle')}</h3>
+              <h3 className="text-base sm:text-lg font-medium text-slate-900 dark:text-white">Current Time</h3>
             </div>
             <p className="text-xl sm:text-2xl font-bold text-cyan-600 dark:text-cyan-400">
               {getCurrentTime()}
             </p>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              {t('reportFlood.timeZone')}
+              Local timezone
             </p>
           </motion.div>
           <motion.div
@@ -655,7 +652,7 @@ if (!predictionResponse.ok) {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700 rounded-xl p-4"
           >
-            <h3 className="text-base sm:text-lg font-medium text-slate-900 dark:text-white mb-3">{t('reportFlood.guideTitle')}</h3>
+            <h3 className="text-base sm:text-lg font-medium text-slate-900 dark:text-white mb-3">Reporting Guidelines</h3>
             <ul className="space-y-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
               <motion.li
                 initial={{ opacity: 0, x: 20 }}
@@ -664,7 +661,7 @@ if (!predictionResponse.ok) {
                 className="flex items-start gap-2"
               >
                 <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                {t('reportFlood.guide1')}
+                Mark the exact location on the map
               </motion.li>
               <motion.li
                 initial={{ opacity: 0, x: 20 }}
@@ -673,7 +670,7 @@ if (!predictionResponse.ok) {
                 className="flex items-start gap-2"
               >
                 <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                {t('reportFlood.guide2')}
+                Provide accurate water level estimation
               </motion.li>
               <motion.li
                 initial={{ opacity: 0, x: 20 }}
@@ -682,7 +679,7 @@ if (!predictionResponse.ok) {
                 className="flex items-start gap-2"
               >
                 <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                {t('reportFlood.guide3')}
+                Include photos if possible
               </motion.li>
               <motion.li
                 initial={{ opacity: 0, x: 20 }}
@@ -691,7 +688,7 @@ if (!predictionResponse.ok) {
                 className="flex items-start gap-2"
               >
                 <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
-                {t('reportFlood.guide4')}
+                Add relevant description of the situation
               </motion.li>
             </ul>
           </motion.div>
@@ -703,7 +700,7 @@ if (!predictionResponse.ok) {
           >
             <h3 className="text-base sm:text-lg font-medium text-slate-900 dark:text-white mb-3 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-green-600 dark:text-green-400" />
-              {t('reportFlood.emergencyContact')}
+              Emergency Contacts
             </h3>
             <div className="space-y-2 text-xs sm:text-sm">
               <div className="flex justify-between">

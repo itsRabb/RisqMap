@@ -20,8 +20,6 @@ import {
   History,
 } from 'lucide-react';
 
-import { useLanguage } from '@/src/context/LanguageContext';
-
 import { Button } from '@/components/ui/Button';
 import { HistoricalIncident, ChartDataPoint, StatCard } from './statistics.types';
 import { generateChartData } from './statistics.utils';
@@ -39,7 +37,6 @@ interface ChatMessage {
 }
 
 export default function StatistikPage() {
-  const { t } = useLanguage();
   // Main state
   const [activeTab, setActiveTab] = useState<'overview' | 'historical'>('overview');
   const [showFilters, setShowFilters] = useState(false);
@@ -103,17 +100,17 @@ export default function StatistikPage() {
   // Stat cards
   const statCards: StatCard[] = [
     {
-      title: t('statistics.overview.stats.totalIncidents'),
+      title: 'Total Incidents',
       value: historicalIncidents.length,
       change: 12,
       changeType: 'increase',
       icon: <Activity className="w-6 h-6" />,
       color: 'blue',
       trend: [],
-      description: t('statistics.overview.stats.descTotalIncidents'),
+      description: 'Total reported disaster incidents',
     },
     {
-      title: t('statistics.overview.stats.evacuees'),
+      title: 'Evacuees',
       value: historicalIncidents
         .reduce((acc, curr) => acc + (curr.evacuees || 0), 0)
         .toLocaleString('en-US'),
@@ -122,7 +119,7 @@ export default function StatistikPage() {
       icon: <Shield className="w-6 h-6" />,
       color: 'cyan',
       trend: [],
-      description: t('statistics.overview.stats.descEvacuees'),
+      description: 'People evacuated from affected areas',
     },
   ];
 
@@ -290,16 +287,16 @@ export default function StatistikPage() {
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl font-bold">{t('statistics.title')}</h1>
+          <h1 className="text-2xl font-bold">Disaster Statistics</h1>
           <div className="flex flex-wrap gap-2 sm:gap-3">
             <Button onClick={() => setActiveTab('overview')} variant={activeTab === 'overview' ? 'default' : 'outline'}>
-              {t('statistics.tabs.overview')}
+              Overview
             </Button>
             <Button onClick={() => setActiveTab('historical')} variant={activeTab === 'historical' ? 'default' : 'outline'}>
-              {t('statistics.tabs.historical')}
+              Historical
             </Button>
             <Button onClick={() => setShowFilters((prev) => !prev)} variant="outline">
-              <Filter className="w-4 h-4 mr-1" /> {t('statistics.filters.button')}
+              <Filter className="w-4 h-4 mr-1" /> Filters
             </Button>
           </div>
         </div>
@@ -316,7 +313,7 @@ export default function StatistikPage() {
               {/* Filter Panel */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-slate-600 dark:text-slate-400">{t('statistics.filters.startDate')}</label>
+                  <label className="text-sm text-slate-600 dark:text-slate-400">Start Date</label>
                   <input
                     type="date"
                     value={startDate}
@@ -325,7 +322,7 @@ export default function StatistikPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-slate-600 dark:text-slate-400">{t('statistics.filters.endDate')}</label>
+                  <label className="text-sm text-slate-600 dark:text-slate-400">End Date</label>
                   <input
                     type="date"
                     value={endDate}

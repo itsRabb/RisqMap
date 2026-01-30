@@ -7,7 +7,6 @@ import { AlertTriangle, Bell, Info, Clock, Users, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getTimeAgo } from '@/lib/utils';
 import type { FloodAlert as FloodAlertType } from '@/types';
-import { useLanguage } from '@/src/context/LanguageContext';
 
 // Import file CSS newly created
 import './DisasterWarningCard.css';
@@ -52,7 +51,6 @@ export const DisasterWarningCard = memo(( // ADDED: memo
   DisasterWarningCard.displayName = 'DisasterWarningCard'; // ADDED: display name
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLElement>(null);
-  const { t, lang } = useLanguage();
 
   // Memoized handlers to optimize animation performance
   const animationHandlers = useMemo(() => {
@@ -203,12 +201,12 @@ export const DisasterWarningCard = memo(( // ADDED: memo
                 </div>
                 <div>
                   <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span>{getTimeAgo(alert.timestamp, lang)}</span>
+                  <span>{getTimeAgo(alert.timestamp)}</span>
                 </div>
                 {alert.affectedAreas && alert.affectedAreas.length > 0 && (
                   <div>
                     <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span>{t('common.affected')} {alert.affectedAreas.join(', ')}</span>
+                    <span>Affected: {alert.affectedAreas.join(', ')}</span>
                   </div>
                 )}
               </div>

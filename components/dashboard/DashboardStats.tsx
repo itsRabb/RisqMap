@@ -22,7 +22,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { getTimeAgo } from '@/lib/utils';
-import { useLanguage } from '@/src/context/LanguageContext';
 
 // Import for API data
 import { WaterLevelPost, PumpData } from '@/lib/api'; // === IMPORT NEW: PumpData ===
@@ -66,17 +65,13 @@ export function DashboardStats({
   pumpStatusError, // Receiving flood pump error status
   className,
 }: DashboardStatsProps) {
-  const { t, lang } = useLanguage();
-
   const getStatusLabel = (status: string) => {
     if (!status) return '';
-    if (lang === 'en') {
-      if (status.toLowerCase().includes('danger')) return 'Danger';
-      if (status.toLowerCase().includes('alert 3')) return 'Alert 3';
-      if (status.toLowerCase().includes('alert 2')) return 'Alert 2';
-      if (status.toLowerCase().includes('alert 1')) return 'Alert 1';
-      if (status.toLowerCase().includes('normal')) return 'Normal';
-    }
+    if (status.toLowerCase().includes('danger')) return 'Danger';
+    if (status.toLowerCase().includes('alert 3')) return 'Alert 3';
+    if (status.toLowerCase().includes('alert 2')) return 'Alert 2';
+    if (status.toLowerCase().includes('alert 1')) return 'Alert 1';
+    if (status.toLowerCase().includes('normal')) return 'Normal';
     return status;
   };
 
@@ -105,17 +100,17 @@ export function DashboardStats({
   const getPumpStatusBadge = (status: string) => {
     const normalized = status.toLowerCase();
     if (normalized.includes('active'))
-      return <Badge variant="success">{t('dashboard.operating')}</Badge>;
+      return <Badge variant="success">Operating</Badge>;
     if (normalized.includes('maintenance'))
-      return <Badge variant="warning">{t('dashboard.maintenance')}</Badge>;
+      return <Badge variant="warning">Maintenance</Badge>;
     if (normalized.includes('offline'))
-      return <Badge variant="danger">{t('dashboard.offline')}</Badge>;
-    return <Badge variant="secondary">{t('dashboard.unknown')}</Badge>;
+      return <Badge variant="danger">Offline</Badge>;
+    return <Badge variant="secondary">Unknown</Badge>;
   };
 
   const statsConfig = [
     {
-      title: t('landing.totalRegions'),
+      title: 'Total Regions',
       value: stats.totalRegions,
       unit: '',
       icon: MapPin,
@@ -124,7 +119,7 @@ export function DashboardStats({
       changeType: percentChanges?.totalRegions && percentChanges.totalRegions >= 0 ? 'up' : 'down',
     },
     {
-      title: t('landing.activeAlerts'),
+      title: 'Active Alerts',
       value: stats.activeAlerts,
       unit: '',
       icon: Bell,
@@ -133,7 +128,7 @@ export function DashboardStats({
       changeType: percentChanges?.activeAlerts && percentChanges.activeAlerts < 0 ? 'down' : 'up',
     },
     {
-      title: t('dashboard.floodZones'),
+      title: 'Flood Zones',
       value: stats.floodZones,
       unit: '',
       icon: Shield,
@@ -142,7 +137,7 @@ export function DashboardStats({
       changeType: percentChanges?.floodZones && percentChanges.floodZones >= 0 ? 'up' : 'down',
     },
     {
-      title: t('dashboard.peopleAtRisk'),
+      title: 'People at Risk',
       value: stats.peopleAtRisk >= 1000000 
         ? `${(stats.peopleAtRisk / 1000000).toFixed(1)}M`
         : stats.peopleAtRisk >= 1000
@@ -155,7 +150,7 @@ export function DashboardStats({
       changeType: percentChanges?.peopleAtRisk && percentChanges.peopleAtRisk < 0 ? 'down' : 'up',
     },
     {
-      title: t('dashboard.weatherStations'),
+      title: 'Weather Stations',
       value: stats.weatherStations,
       unit: '',
       icon: Activity,
@@ -218,41 +213,41 @@ export function DashboardStats({
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                <span className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">{t('dashboard.pumpSystemStatus')}</span> {/* Title changed */}
+                <span className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Pump System Status</span> {/* Title changed */}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {loadingPumpStatus ? (
                 <div className="text-center text-xs sm:text-sm text-muted-foreground flex items-center justify-center space-x-2 h-[120px]">
                   <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                  <span>{t('dashboard.loadingPumpStatus')}</span>
+                  <span>Loading pump status...</span>
                 </div>
               ) : pumpStatusError ? (
                 <div className="text-center text-xs sm:text-sm text-red-400 h-[120px] flex items-center justify-center">
                   <AlertTriangle className="h-5 w-5 mr-2" />
-                  <span>{t('dashboard.pumpError')}{pumpStatusError}</span>
+                  <span>Error: {pumpStatusError}</span>
                 </div>
               ) : totalPumps > 0 ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs sm:text-sm">{t('dashboard.totalRegisteredPumps')}</span>
+                    <span className="text-xs sm:text-sm">Total Registered Pumps</span>
                     <Badge variant="secondary">{totalPumps}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs sm:text-sm">{t('dashboard.operatingPumps')}</span>
+                    <span className="text-xs sm:text-sm">Operating Pumps</span>
                     <Badge variant="success">
                       <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                       {activePumps}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs sm:text-sm">{t('dashboard.nonOperatingPumps')}</span>
+                    <span className="text-xs sm:text-sm">Non-Operating Pumps</span>
                     <Badge variant="secondary">
                       {offlinePumps}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs sm:text-sm">{t('dashboard.needingMaintenance')}</span>
+                    <span className="text-xs sm:text-sm">Needing Maintenance</span>
                     <Badge variant="warning">
                       <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                       {pumpsNeedingMaintenance}
@@ -261,7 +256,7 @@ export function DashboardStats({
                 </div>
               ) : (
                 <div className="text-center text-xs sm:text-sm text-muted-foreground h-[120px] flex items-center justify-center">
-                  <span>{t('dashboard.selectRegionForPumps')}</span>
+                  <span>Select a region to view pump data</span>
                 </div>
               )}
             </CardContent>
@@ -278,7 +273,7 @@ export function DashboardStats({
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
-                <span className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">{t('dashboard.recentActivity')}</span>
+                <span className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Recent Activity</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -287,12 +282,12 @@ export function DashboardStats({
                 {loadingWaterLevel && (
                   <div className="text-center text-sm text-muted-foreground flex items-center justify-center space-x-2">
                     <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                    <span>{t('dashboard.loadingWaterLevel')}</span>
+                    <span>Loading water level data...</span>
                   </div>
                 )}
                 {waterLevelError && (
                   <div className="text-center text-sm text-red-400">
-                    {t('dashboard.waterLevelError')}{waterLevelError}
+                    Error: {waterLevelError}
                   </div>
                 )}
                 {!loadingWaterLevel &&
@@ -310,14 +305,14 @@ export function DashboardStats({
                         {/* Blue color for water level */}
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-slate-900 dark:text-white">
-                            {t('dashboard.waterLevel')} {post.name}: {post.water_level || 'N/A'}{' '}
+                            Water Level {post.name}: {post.water_level || 'N/A'}{' '}
                             {post.unit || 'm'}
                             {post.status && ` (${getStatusLabel(post.status)})`}
                           </p>
                           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                             {post.timestamp
-                              ? getTimeAgo(new Date(post.timestamp), lang)
-                              : t('dashboard.timeUnavailable')}
+                              ? getTimeAgo(new Date(post.timestamp), 'en')
+                              : 'Time unavailable'}
                           </p>
                         </div>
                         {post.status && (
@@ -349,7 +344,7 @@ export function DashboardStats({
                   !waterLevelError &&
                   waterLevelPosts.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center">
-                    {t('dashboard.selectRegionForWaterLevel')}
+                    Select a region to view water level data
                   </p>
                 ) : null}
               </div>

@@ -28,7 +28,6 @@ import { id, enUS } from 'date-fns/locale';
 
 import { useWeatherData } from '@/hooks/useWeatherData';
 import FloodReportChart from './FloodReportChart';
-import { useLanguage } from '@/src/context/LanguageContext';
 
 interface FloodReport {
   id: string;
@@ -43,7 +42,7 @@ interface FloodReport {
   created_at: string; // ISO string
 }
 
-const classifyWaterLevelString = (waterLevelString: string, t: (key: string) => string): {
+const classifyWaterLevelString = (waterLevelString: string): {
   label: string;
   level: 'low' | 'medium' | 'high';
   colorClass: string;
@@ -51,15 +50,15 @@ const classifyWaterLevelString = (waterLevelString: string, t: (key: string) => 
 } => {
   switch (waterLevelString) {
     case 'ankle-length':
-      return { label: t('sensorData.filter.low'), level: 'low', colorClass: 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-500/20', icon: <Activity className="h-4 w-4" /> };
+      return { label: 'Low', level: 'low', colorClass: 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-500/20', icon: <Activity className="h-4 w-4" /> };
     case 'knee-length':
-      return { label: t('sensorData.filter.medium').split('/')[0], level: 'medium', colorClass: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-500/20', icon: <Droplets className="h-4 w-4" /> };
+      return { label: 'Knee', level: 'medium', colorClass: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-500/20', icon: <Droplets className="h-4 w-4" /> };
     case 'mid-thigh':
-      return { label: t('sensorData.filter.medium').split('/')[1] || t('sensorData.filter.medium'), level: 'medium', colorClass: 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-500/20', icon: <Droplets className="h-4 w-4" /> };
+      return { label: 'Thigh', level: 'medium', colorClass: 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-500/20', icon: <Droplets className="h-4 w-4" /> };
     case 'belly-waist':
-      return { label: t('sensorData.filter.high').split('/')[0], level: 'high', colorClass: 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-500/20', icon: <AlertCircle className="h-4 w-4" /> };
+      return { label: 'Waist', level: 'high', colorClass: 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-500/20', icon: <AlertCircle className="h-4 w-4" /> };
     case 'chest-length':
-      return { label: t('sensorData.filter.high').split('/')[1] || t('sensorData.filter.high'), level: 'high', colorClass: 'text-red-700 dark:text-red-500 bg-red-200 dark:bg-red-700/20', icon: <AlertCircle className="h-4 w-4" /> };
+      return { label: 'Chest', level: 'high', colorClass: 'text-red-700 dark:text-red-500 bg-red-200 dark:bg-red-700/20', icon: <AlertCircle className="h-4 w-4" /> };
     default:
       return { label: 'Unknown', level: 'low', colorClass: 'text-slate-600 dark:text-gray-400 bg-slate-100 dark:bg-gray-500/20', icon: <Activity className="h-4 w-4" /> };
   }
@@ -70,7 +69,6 @@ interface DataSensorClientContentProps {
 }
 
 const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initialReport }) => {
-  const { t, lang } = useLanguage();
   const [report, setReport] = useState<FloodReport[]>(initialReport);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -98,7 +96,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
         report.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (report.description && report.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      const level = classifyWaterLevelString(report.water_level, t).level;
+      const level = classifyWaterLevelString(report.water_level).level;
       const matchesFilter = selectedFilter === 'all' || selectedFilter === level;
 
       return matchesSearch && matchesFilter;
@@ -110,7 +108,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
     );
 
     return sorted;
-  }, [report, searchTerm, selectedFilter, t]);
+  }, [report, searchTerm, selectedFilter]);
 
 
   const displayedReports = useMemo(() => {
@@ -119,30 +117,30 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
 
   const stats = useMemo(() => {
     const total = report.length;
-    const highLevel = report.filter(r => classifyWaterLevelString(r.water_level, t).level === 'high').length;
-    const mediumLevel = report.filter(r => classifyWaterLevelString(r.water_level, t).level === 'medium').length;
-    const lowLevel = report.filter(r => classifyWaterLevelString(r.water_level, t).level === 'low').length;
+    const highLevel = report.filter(r => classifyWaterLevelString(r.water_level).level === 'high').length;
+    const mediumLevel = report.filter(r => classifyWaterLevelString(r.water_level).level === 'medium').length;
+    const lowLevel = report.filter(r => classifyWaterLevelString(r.water_level).level === 'low').length;
 
     return { total, highLevel, mediumLevel, lowLevel, avgLevel: 0 };
-  }, [report, t]);
+  }, [report]);
 
   const handleExportData = () => {
     // Using displayedReports (as apparently intended)
     if (displayedReports.length === 0) {
-      alert(t('sensorData.modals.weather.unavailable'));
+      alert('No data available to export.');
       return;
     }
 
     const headers = [
       'ID',
-      t('sensorData.reports.location'),
+      'Location',
       'Latitude',
       'Longitude',
       'Water Level',
       'Description',
       'Reporter Name',
       'Reporter Contact',
-      t('sensorData.reports.time')
+      'Time'
     ];
 
     const csvContent = [
@@ -153,7 +151,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
           `"${report.location}"`,
           report.latitude,
           report.longitude,
-          `"${classifyWaterLevelString(report.water_level, t).label}"`,
+          `"${classifyWaterLevelString(report.water_level).label}"`,
           `"${report.description ? report.description.replace(/"/g, '""') : ''}"`,
           `"${report.reporter_name ? report.reporter_name.replace(/"/g, '""') : ''}"`,
           `"${report.reporter_contact ? report.reporter_contact.replace(/"/g, '""') : ''}"`,
@@ -187,7 +185,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
 
   const handleScheduleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(t('sensorData.modals.schedule.success').replace('{email}', scheduleEmail).replace('{frequency}', scheduleFrequency));
+    alert(`Report successfully scheduled to be sent to ${scheduleEmail} on a ${scheduleFrequency} basis.`);
     handleCloseScheduleModal();
   };
 
@@ -203,7 +201,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
 
   const handleAlertSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(t('sensorData.modals.alert.success').replace('{threshold}', alertThreshold).replace('{method}', alertMethod));
+    alert(`Alert successfully configured for ${alertThreshold} level via ${alertMethod}.`);
     handleCloseAlertModal();
   };
 
@@ -216,11 +214,11 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
         },
         (geoError) => {
           console.error("Error getting geolocation:", geoError);
-          alert(t('sensorData.modals.weather.geolocationError'));
+          alert('Failed to access geolocation. Please enable location services.');
         }
       );
     } else {
-      alert(t('sensorData.modals.weather.geolocationUnsupported'));
+      alert('Geolocation is not supported by your browser.');
     }
   };
 
@@ -238,8 +236,8 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
               <TableIcon className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t('sensorData.title')}</h1>
-              <p className="text-slate-500 dark:text-gray-400">{t('sensorData.subtitle')}</p>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Sensor Data & Monitoring</h1>
+              <p className="text-slate-500 dark:text-gray-400">Real-time flood sensor data and analytics</p>
             </div>
           </div>
         </div>
@@ -252,34 +250,34 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
               <span className="bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 text-xs px-2 py-1 rounded-full">Total</span>
             </div>
             <div className="text-3xl font-bold mb-1 text-slate-900 dark:text-white">{stats.total}</div>
-            <div className="text-slate-500 dark:text-gray-400 text-sm">{t('sensorData.statistics.totalReports')}</div>
+            <div className="text-slate-500 dark:text-gray-400 text-sm">Total Reports</div>
           </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <AlertCircle className="h-8 w-8 text-red-500 dark:text-red-400" />
-              <span className="bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs px-2 py-1 rounded-full">{t('common.levels.high')}</span>
+              <span className="bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs px-2 py-1 rounded-full">High</span>
             </div>
             <div className="text-3xl font-bold mb-1 text-slate-900 dark:text-white">{stats.highLevel}</div>
-            <div className="text-slate-500 dark:text-gray-400 text-sm">{t('sensorData.statistics.highLevel')}</div>
+            <div className="text-slate-500 dark:text-gray-400 text-sm">High Water Level</div>
           </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <Droplets className="h-8 w-8 text-yellow-500 dark:text-yellow-400" />
-              <span className="bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-xs px-2 py-1 rounded-full">{t('common.levels.medium')}</span>
+              <span className="bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-xs px-2 py-1 rounded-full">Medium</span>
             </div>
             <div className="text-3xl font-bold mb-1 text-slate-900 dark:text-white">{stats.mediumLevel}</div>
-            <div className="text-slate-500 dark:text-gray-400 text-sm">{t('sensorData.statistics.mediumLevel')}</div>
+            <div className="text-slate-500 dark:text-gray-400 text-sm">Medium Water Level</div>
           </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <Activity className="h-8 w-8 text-green-500 dark:text-green-400" />
-              <span className="bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-xs px-2 py-1 rounded-full">{t('common.levels.low')}</span>
+              <span className="bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-xs px-2 py-1 rounded-full">Low</span>
             </div>
             <div className="text-3xl font-bold mb-1 text-slate-900 dark:text-white">{stats.lowLevel}</div>
-            <div className="text-slate-500 dark:text-gray-400 text-sm">{t('sensorData.statistics.lowLevel')}</div>
+            <div className="text-slate-500 dark:text-gray-400 text-sm">Low Water Level</div>
           </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -288,7 +286,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
               <span className="bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs px-2 py-1 rounded-full">Avg</span>
             </div>
             <div className="text-3xl font-bold mb-1 text-slate-900 dark:text-white">{stats.avgLevel}<span className="text-lg text-slate-400 dark:text-gray-400">cm</span></div>
-            <div className="text-slate-500 dark:text-gray-400 text-sm">{t('sensorData.statistics.avgLevel')}</div>
+            <div className="text-slate-500 dark:text-gray-400 text-sm">Average Water Level</div>
           </div>
         </div>
 
@@ -300,7 +298,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder={t('sensorData.filter.searchPlaceholder')}
+                  placeholder="Search by location or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent placeholder-slate-400"
@@ -311,10 +309,10 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 onChange={(e) => setSelectedFilter(e.target.value)}
                 className="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
               >
-                <option value="all">{t('sensorData.filter.allLevels')}</option>
-                <option value="low">{t('sensorData.filter.low')}</option>
-                <option value="medium">{t('sensorData.filter.medium')}</option>
-                <option value="high">{t('sensorData.filter.high')}</option>
+                <option value="all">All Levels</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
               </select>
             </div>
             <div className="flex items-center space-x-2">
@@ -323,11 +321,11 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 className="flex items-center space-x-2 bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 px-4 py-2 rounded-lg hover:bg-cyan-200 dark:hover:bg-cyan-500/30 transition-colors"
               >
                 <Download className="h-4 w-4" />
-                <span>{t('sensorData.filter.export')}</span>
+                <span>Export</span>
               </button>
               <button className="flex items-center space-x-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
                 <Filter className="h-4 w-4" />
-                <span>{t('sensorData.filter.filter')}</span>
+                <span>Filter</span>
               </button>
             </div>
           </div>
@@ -345,9 +343,9 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                       <TableIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{t('sensorData.reports.title')}</h3>
+                      <h3 className="text-xl font-semibold text-slate-900 dark:text-white">Flood Reports</h3>
                       <p className="text-sm text-slate-500 dark:text-gray-400">
-                        {t('sensorData.reports.showing')} {displayedReports.length} {t('sensorData.reports.of')} {report.length} {t('sensorData.reports.reports')}
+                        Showing {displayedReports.length} of {report.length} reports
                       </p>
                       {/* Note: Button component is not imported, assuming it's from a library like shadcn/ui */}
                       {displayedReports.length < filteredAndSortedReport.length && (
@@ -355,7 +353,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                           onClick={() => setDisplayLimit(filteredAndSortedReport.length)}
                           className="mt-4 w-full border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-gray-300 rounded-lg px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                         >
-                          {t('sensorData.reports.viewMore')} ({filteredAndSortedReport.length - displayedReports.length} {t('sensorData.reports.moreReports')})
+                          View More ({filteredAndSortedReport.length - displayedReports.length} more reports)
                         </button>
                       )}
                     </div>
@@ -376,9 +374,9 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                             <div className="flex items-center space-x-3 mb-3">
                               <MapPin className="h-4 w-4 text-cyan-600 dark:text-cyan-400 flex-shrink-0" />
                               <h4 className="font-semibold text-slate-900 dark:text-white truncate">{report.location}</h4>
-                              <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${classifyWaterLevelString(report.water_level || '', t).colorClass}`}>
-                                {classifyWaterLevelString(report.water_level || '', t).icon}
-                                <span>{classifyWaterLevelString(report.water_level || '', t).label}</span>
+                              <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${classifyWaterLevelString(report.water_level || '').colorClass}`}>
+                                {classifyWaterLevelString(report.water_level || '').icon}
+                                <span>{classifyWaterLevelString(report.water_level || '').label}</span>
                               </div>
                             </div>
 
@@ -426,8 +424,8 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 ) : (
                   <div className="p-12 text-center">
                     <TableIcon className="h-16 w-16 text-slate-400 dark:text-gray-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-slate-500 dark:text-gray-400 mb-2">{t('sensorData.reports.noData')}</h3>
-                    <p className="text-slate-400 dark:text-gray-500">{t('sensorData.reports.noDataDesc')}</p>
+                    <h3 className="text-lg font-semibold text-slate-500 dark:text-gray-400 mb-2">No Flood Reports</h3>
+                    <p className="text-slate-400 dark:text-gray-500">There are currently no flood reports available for the selected filters.</p>
                   </div>
                 )}
               </div>
@@ -444,8 +442,8 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                     <CloudRain className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{t('sensorData.weather.title')}</h3>
-                    <p className="text-sm text-slate-500 dark:text-gray-400">{t('sensorData.weather.subtitle')}</p>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Current Weather</h3>
+                    <p className="text-sm text-slate-500 dark:text-gray-400">Live weather conditions</p>
                   </div>
                 </div>
               </div>
@@ -453,12 +451,12 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 {isWeatherLoading ? (
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-cyan-600 dark:text-cyan-400 mx-auto mb-3" />
-                    <p className="text-slate-500 dark:text-gray-400">{t('sensorData.weather.loading')}</p>
+                    <p className="text-slate-500 dark:text-gray-400">Loading weather data...</p>
                   </div>
                 ) : weatherError ? (
                   <div className="text-center py-8">
                     <AlertCircle className="h-8 w-8 text-red-500 dark:text-red-400 mx-auto mb-3" />
-                    <p className="text-red-500 dark:text-red-400">{t('sensorData.weather.error')} {weatherError}</p>
+                    <p className="text-red-500 dark:text-red-400">Error loading weather: {weatherError}</p>
                   </div>
                 ) : weatherData ? (
                   <>
@@ -481,29 +479,29 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                       <div className="text-center">
                         <Droplets className="h-6 w-6 text-blue-500 dark:text-blue-400 mx-auto mb-2" />
                         <div className="text-lg font-semibold text-slate-900 dark:text-white">{((weatherData.current as any).main?.humidity ?? (weatherData.current as any).relativehumidity_2m ?? (weatherData.current as any).humidity) ?? 'N/A'}%</div>
-                        <div className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.humidity')}</div>
+                        <div className="text-xs text-slate-500 dark:text-gray-400">Humidity</div>
                       </div>
                       <div className="text-center">
                         <Wind className="h-6 w-6 text-green-500 dark:text-green-400 mx-auto mb-2" />
                         <div className="text-lg font-semibold text-slate-900 dark:text-white">{((weatherData.current as any).wind?.speed ?? weatherData.current.windspeed) ?? 'N/A'} m/s</div>
-                        <div className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.wind')}</div>
+                        <div className="text-xs text-slate-500 dark:text-gray-400">Wind</div>
                       </div>
                       <div className="text-center">
                         <Thermometer className="h-6 w-6 text-orange-500 dark:text-orange-400 mx-auto mb-2" />
                         <div className="text-lg font-semibold text-slate-900 dark:text-white">{((weatherData.current as any).main?.pressure ?? (weatherData.current as any).pressure) ?? 'N/A'} hPa</div>
-                        <div className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.pressure')}</div>
+                        <div className="text-xs text-slate-500 dark:text-gray-400">Pressure</div>
                       </div>
                       <div className="text-center">
                         <Eye className="h-6 w-6 text-purple-500 dark:text-purple-400 mx-auto mb-2" />
                       <div className="text-lg font-semibold text-slate-900 dark:text-white">{((weatherData.current as any).visibility ? (weatherData.current as any).visibility / 1000 : (weatherData.current as any).visibility_km) ?? 'N/A'} km</div>
-                        <div className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.visibility')}</div>
+                        <div className="text-xs text-slate-500 dark:text-gray-400">Visibility</div>
                       </div>
                     </div>
                   </>
                 ) : (
                   <div className="text-center py-8">
                     <AlertCircle className="h-8 w-8 text-slate-400 dark:text-gray-400 mx-auto mb-3" />
-                    <p className="text-slate-500 dark:text-gray-400">{t('sensorData.weather.unavailable')}</p>
+                    <p className="text-slate-500 dark:text-gray-400">Weather data unavailable</p>
                   </div>
                 )}
               </div>
@@ -516,7 +514,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
 
             {/* Quick Actions */}
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{t('sensorData.actions.title')}</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <button
                   onClick={handleExportData}
@@ -524,7 +522,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 >
                   <div className="flex items-center space-x-3">
                     <Download className="h-4 w-4" />
-                    <span>{t('sensorData.filter.export')}</span>
+                    <span>Export Data</span>
                   </div>
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -534,7 +532,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 >
                   <div className="flex items-center space-x-3">
                     <Calendar className="h-4 w-4" />
-                    <span>{t('sensorData.actions.scheduleReport')}</span>
+                    <span>Schedule Report</span>
                   </div>
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -544,7 +542,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 >
                   <div className="flex items-center space-x-3">
                     <AlertCircle className="h-4 w-4" />
-                    <span>{t('sensorData.actions.alertSettings')}</span>
+                    <span>Alert Settings</span>
                   </div>
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -554,7 +552,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 >
                   <div className="flex items-center space-x-3">
                     <Cloud className="h-4 w-4" />
-                    <span>{t('sensorData.actions.currentWeather')}</span>
+                    <span>Current Weather</span>
                   </div>
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -566,10 +564,10 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
       {isScheduleModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 w-full max-w-md mx-auto shadow-xl">
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">{t('sensorData.modals.schedule.title')}</h3>
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Schedule Periodic Report</h3>
             <form onSubmit={handleScheduleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="scheduleEmail" className="block text-slate-700 dark:text-gray-300 text-sm font-medium mb-1">{t('sensorData.modals.schedule.emailLabel')}</label>
+                <label htmlFor="scheduleEmail" className="block text-slate-700 dark:text-gray-300 text-sm font-medium mb-1">Email Address</label>
                 <input
                   type="email"
                   id="scheduleEmail"
@@ -581,16 +579,16 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 />
               </div>
               <div>
-                <label htmlFor="scheduleFrequency" className="block text-slate-700 dark:text-gray-300 text-sm font-medium mb-1">{t('sensorData.modals.schedule.frequencyLabel')}</label>
+                <label htmlFor="scheduleFrequency" className="block text-slate-700 dark:text-gray-300 text-sm font-medium mb-1">Frequency</label>
                 <select
                   id="scheduleFrequency"
                   value={scheduleFrequency}
                   onChange={(e) => setScheduleFrequency(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
-                  <option value="daily">{t('sensorData.modals.schedule.daily')}</option>
-                  <option value="weekly">{t('sensorData.modals.schedule.weekly')}</option>
-                  <option value="monthly">{t('sensorData.modals.schedule.monthly')}</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
                 </select>
               </div>
               <div className="flex justify-end space-x-3">
@@ -599,13 +597,13 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                   onClick={handleCloseScheduleModal}
                   className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-white rounded-lg hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors"
                 >
-                  {t('sensorData.modals.schedule.cancel')}
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
                 >
-                  {t('sensorData.modals.schedule.submit')}
+                  Schedule
                 </button>
               </div>
             </form>
@@ -616,31 +614,31 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
       {isAlertModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 w-full max-w-md mx-auto shadow-xl">
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">{t('sensorData.modals.alert.title')}</h3>
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Alert Settings</h3>
             <form onSubmit={handleAlertSubmit} className="space-y-4">
               <div>
-                <label htmlFor="alertThreshold" className="block text-slate-700 dark:text-gray-300 text-sm font-medium mb-1">{t('sensorData.modals.alert.thresholdLabel')}</label>
+                <label htmlFor="alertThreshold" className="block text-slate-700 dark:text-gray-300 text-sm font-medium mb-1">Alert Threshold</label>
                 <select
                   id="alertThreshold"
                   value={alertThreshold}
                   onChange={(e) => setAlertThreshold(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
-                  <option value="low">{t('sensorData.filter.low')}</option>
-                  <option value="medium">{t('sensorData.filter.medium')}</option>
-                  <option value="high">{t('sensorData.filter.high')}</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
                 </select>
               </div>
               <div>
-                <label htmlFor="alertMethod" className="block text-slate-700 dark:text-gray-300 text-sm font-medium mb-1">{t('sensorData.modals.alert.methodLabel')}</label>
+                <label htmlFor="alertMethod" className="block text-slate-700 dark:text-gray-300 text-sm font-medium mb-1">Notification Method</label>
                 <select
                   id="alertMethod"
                   value={alertMethod}
                   onChange={(e) => setAlertMethod(e.target.value)}
                   className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
-                  <option value="email">{t('sensorData.modals.alert.email')}</option>
-                  <option value="sms">{t('sensorData.modals.alert.sms')}</option>
+                  <option value="email">Email</option>
+                  <option value="sms">SMS</option>
                 </select>
               </div>
               <div className="flex justify-end space-x-3">
@@ -649,13 +647,13 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                   onClick={handleCloseAlertModal}
                   className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-white rounded-lg hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors"
                 >
-                  {t('sensorData.modals.alert.cancel')}
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
                 >
-                  {t('sensorData.modals.alert.save')}
+                  Save Settings
                 </button>
               </div>
             </form>
@@ -666,21 +664,21 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
       {isWeatherModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 w-full max-w-md mx-auto shadow-xl">
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">{t('sensorData.modals.weather.title')}</h3>
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Current Weather Details</h3>
             {isWeatherLoading ? (
               <div className="text-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-cyan-600 dark:text-cyan-400 mx-auto mb-3" />
-                <p className="text-slate-500 dark:text-gray-400">{t('sensorData.weather.loading')}</p>
+                <p className="text-slate-500 dark:text-gray-400">Loading weather data...</p>
               </div>
             ) : weatherError ? (
               <div className="text-center py-8">
                 <AlertCircle className="h-8 w-8 text-red-500 dark:text-red-400 mx-auto mb-3" />
-                <p className="text-red-500 dark:text-red-400">{t('sensorData.weather.error')} {weatherError}</p>
+                <p className="text-red-500 dark:text-red-400">Error loading weather: {weatherError}</p>
               </div>
             ) : weatherData ? (
               <div className="space-y-4">
                 <div className="text-center">
-                  <p className="text-slate-500 dark:text-gray-400 text-sm">{t('sensorData.reports.location')}: {(weatherData?.current as any)?.name}</p>
+                  <p className="text-slate-500 dark:text-gray-400 text-sm">Location: {(weatherData?.current as any)?.name}</p>
                   <div className="text-5xl font-bold text-slate-900 dark:text-white mt-2">{Math.round((weatherData?.current as any)?.main?.temp || (weatherData?.current as any)?.temperature || 0)}°</div>
                   <p className="text-slate-500 dark:text-gray-400 text-lg">{(weatherData?.current as any)?.weather?.[0]?.description || (weatherData?.current as any)?.description}</p>
                 </div>
@@ -688,39 +686,39 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                   <div>
                     <Droplets className="h-6 w-6 text-blue-500 dark:text-blue-400 mx-auto mb-1" />
                     <p className="text-lg font-semibold text-slate-900 dark:text-white">{(weatherData?.current as any)?.main?.humidity || (weatherData?.current as any)?.humidity}%</p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.humidity')}</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400">Humidity</p>
                   </div>
                   <div>
                     <Wind className="h-6 w-6 text-green-500 dark:text-green-400 mx-auto mb-1" />
                     <p className="text-lg font-semibold text-slate-900 dark:text-white">{(weatherData?.current as any)?.wind?.speed || weatherData?.current?.windspeed} m/s</p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.wind')}</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400">Wind</p>
                   </div>
                   <div>
                     <Thermometer className="h-6 w-6 text-orange-500 dark:text-orange-400 mx-auto mb-1" />
                     <p className="text-lg font-semibold text-slate-900 dark:text-white">{(weatherData?.current as any)?.main?.pressure || (weatherData?.current as any)?.pressure} hPa</p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.pressure')}</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400">Pressure</p>
                   </div>
                   <div>
                     <Eye className="h-6 w-6 text-purple-500 dark:text-purple-400 mx-auto mb-1" />
                     <p className="text-lg font-semibold text-slate-900 dark:text-white">{(weatherData?.current as any)?.visibility ? (weatherData.current as any).visibility / 1000 : 'N/A'} km</p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.visibility')}</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400">Visibility</p>
                   </div>
                   <div>
                     <Clock className="h-6 w-6 text-yellow-500 dark:text-yellow-400 mx-auto mb-1" />
                     <p className="text-lg font-semibold text-slate-900 dark:text-white">{(weatherData?.current as any)?.sys?.sunrise ? format(new Date((weatherData.current as any).sys.sunrise * 1000), 'HH:mm') : 'N/A'}</p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.sunrise')}</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400">Sunrise</p>
                   </div>
                   <div>
                     <Clock className="h-6 w-6 text-yellow-500 dark:text-yellow-400 mx-auto mb-1" />
                     <p className="text-lg font-semibold text-slate-900 dark:text-white">{(weatherData?.current as any)?.sys?.sunset ? format(new Date((weatherData.current as any).sys.sunset * 1000), 'HH:mm') : 'N/A'}</p>
-                    <p className="text-xs text-slate-500 dark:text-gray-400">{t('sensorData.weather.sunset')}</p>
+                    <p className="text-xs text-slate-500 dark:text-gray-400">Sunset</p>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="text-center py-8">
                 <AlertCircle className="h-8 w-8 text-slate-400 dark:text-gray-400 mx-auto mb-3" />
-                <p className="text-slate-500 dark:text-gray-400">{t('sensorData.weather.unavailable')}</p>
+                <p className="text-slate-500 dark:text-gray-400">Weather data unavailable</p>
               </div>
             )}
             <div className="flex justify-end mt-6">
@@ -729,7 +727,7 @@ const DataSensorClientContent: React.FC<DataSensorClientContentProps> = ({ initi
                 onClick={handleCloseWeatherModal}
                 className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-white rounded-lg hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors"
               >
-                {t('sensorData.modals.weather.close')}
+                Close
               </button>
             </div>
           </div>

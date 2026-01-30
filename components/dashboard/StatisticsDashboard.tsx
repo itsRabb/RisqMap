@@ -35,7 +35,6 @@ import {
   Cell,
 } from 'recharts';
 import { normalizeSeries, ChartRow } from '@/lib/utils';
-import { useLanguage } from '@/src/context/LanguageContext';
 
 // Helper to generate random data
 const generateRandomData = (days: number) => {
@@ -71,7 +70,6 @@ interface ChartData {
 const DATA_KEYS = ['amount', 'resolved'];
 
 const StatisticsDashboard = () => {
-  const { t } = useLanguage();
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
   const [isLoading, setIsLoading] = useState(false);
   const [chartData, setChartData] = useState<ChartData>({ line: [], bar: [], pie: [] });
@@ -176,10 +174,10 @@ const StatisticsDashboard = () => {
         <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm text-slate-900 dark:text-white p-3 rounded-lg border border-slate-200 dark:border-slate-600 shadow-lg">
           <p className="font-bold text-cyan-600 dark:text-cyan-400">{label}</p>
           {dataItem.amount !== undefined && (
-            <p className="text-sm">{`${t('sensorData.charts.reports')}: ${dataItem.amount}`}</p>
+            <p className="text-sm">{`Reports: ${dataItem.amount}`}</p>
           )}
           {dataItem.resolved !== undefined && (
-            <p className="text-sm">{`${t('sensorData.charts.resolved')}: ${dataItem.resolved}`}</p>
+            <p className="text-sm">{`Resolved: ${dataItem.resolved}`}</p>
           )}
         </div>
       );
@@ -195,7 +193,7 @@ const StatisticsDashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="text-xl font-bold text-slate-900 dark:text-white">
-                {t('sensorData.statistics.title')}
+                Flood Statistics
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -204,10 +202,10 @@ const StatisticsDashboard = () => {
                 onChange={(e) => setSelectedTimeRange(e.target.value)}
                 className="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
               >
-                <option value="24h">{t('sensorData.filter.timeRange.h24')}</option>
-                <option value="7d">{t('sensorData.filter.timeRange.d7')}</option>
-                <option value="30d">{t('sensorData.filter.timeRange.d30')}</option>
-                <option value="90d">{t('sensorData.filter.timeRange.d90')}</option>
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last 90 Days</option>
               </select>
             </div>
           </div>
@@ -222,7 +220,7 @@ const StatisticsDashboard = () => {
           {/* Bar Chart: Most Vulnerable Locations */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 lg:col-span-1 shadow-sm">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-              {t('sensorData.charts.mostVulnerable')}
+              Most Vulnerable Regions
             </h3>
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
@@ -238,11 +236,11 @@ const StatisticsDashboard = () => {
                       content={<CustomTooltip />}
                       cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }}
                     />
-                    <Bar dataKey="amount" fill="#2dd4bf" radius={[4, 4, 0, 0]} name={t('sensorData.charts.reports')} />
+                    <Bar dataKey="amount" fill="#2dd4bf" radius={[4, 4, 0, 0]} name="Reports" />
                   </BarChart>
                 ) : (
                   <div className="flex items-center justify-center h-full text-slate-500">
-                    {t('sensorData.charts.noData')}
+                    No data available
                   </div>
                 )}
               </ResponsiveContainer>
@@ -252,7 +250,7 @@ const StatisticsDashboard = () => {
           {/* Line Chart: Flood Incident Trend */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 lg:col-span-2 shadow-sm">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-              {t('sensorData.charts.floodTrend')}
+              Flood Trend
             </h3>
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
@@ -272,19 +270,19 @@ const StatisticsDashboard = () => {
                       stroke="#2dd4bf"
                       strokeWidth={2}
                       activeDot={{ r: 8 }}
-                      name={t('sensorData.charts.reports')}
+                      name="Reports"
                     />
                     <Line
                       type="monotone"
                       dataKey="resolved"
                       stroke="#818cf8"
                       strokeWidth={2}
-                      name={t('sensorData.charts.resolved')}
+                      name="Resolved"
                     />
                   </LineChart>
                 ) : (
                   <div className="flex items-center justify-center h-full text-slate-500">
-                    {t('sensorData.charts.noData')}
+                    No data available
                   </div>
                 )}
               </ResponsiveContainer>
@@ -294,7 +292,7 @@ const StatisticsDashboard = () => {
           {/* Pie Chart: Report Composition */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 lg:col-span-1 shadow-sm">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-              {t('sensorData.charts.reportComposition')}
+              Report Composition
             </h3>
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
@@ -322,7 +320,7 @@ const StatisticsDashboard = () => {
                   </PieChart>
                 ) : (
                   <div className="flex items-center justify-center h-full text-slate-500">
-                    {t('sensorData.charts.noData')}
+                    No data available
                   </div>
                 )}
               </ResponsiveContainer>
@@ -332,7 +330,7 @@ const StatisticsDashboard = () => {
           {/* New Stacked Bar Chart: Daily and Completed Reports */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 lg:col-span-2 shadow-sm">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-              {t('sensorData.charts.dailyResolved')}
+              Daily Resolved Reports
             </h3>
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
@@ -350,18 +348,18 @@ const StatisticsDashboard = () => {
                       dataKey="amount"
                       stackId="a"
                       fill="#2dd4bf"
-                      name={t('sensorData.charts.total')}
+                      name="Total"
                     />
                     <Bar
                       dataKey="resolved"
                       stackId="a"
                       fill="#818cf8"
-                      name={t('sensorData.charts.resolved')}
+                      name="Resolved"
                     />
                   </BarChart>
                 ) : (
                   <div className="flex items-center justify-center h-full text-slate-500">
-                    {t('sensorData.charts.noData')}
+                    No data available
                   </div>
                 )}
               </ResponsiveContainer>

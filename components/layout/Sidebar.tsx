@@ -29,8 +29,6 @@ import { cn } from '@/lib/utils';
 import { useAlertCount } from '@/components/contexts/AlertCountContext';
 import { CommandMenu } from './CommandMenu';
 
-import { useLanguage } from '@/src/context/LanguageContext';
-
 interface NavItem {
   id: string;
   label: string; // This will now be the dictionary key suffix
@@ -125,6 +123,28 @@ const quickActions: QuickActionItem[] = [
   },
 ];
 
+function getNavLabel(label: string): string {
+  const labels: Record<string, string> = {
+    dashboard: 'Dashboard',
+    floodMonitoring: 'Flood Monitoring',
+    weatherForecast: 'Weather Forecast',
+    alerts: 'Alerts',
+    reportFlood: 'Report Flood',
+    evacuationInfo: 'Evacuation Info',
+    sensorData: 'Sensor Data',
+    statistics: 'Statistics',
+    aboutRisqMap: 'About RisqMap',
+  };
+  return labels[label] || label;
+}
+
+function getActionLabel(label: string): string {
+  const labels: Record<string, string> = {
+    currentWeather: 'Current Weather',
+  };
+  return labels[label] || label;
+}
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -141,7 +161,6 @@ export function Sidebar({
   onShowWeatherPopup, // Destructure new prop
 }: SidebarProps) {
   const router = useRouter();
-  const { t } = useLanguage();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { highAlertCount, loadingAlerts } = useAlertCount();
   const [isCommandOpen, setCommandOpen] = useState(false);
@@ -209,8 +228,8 @@ export function Sidebar({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
             >
-              <h2 className="text-lg font-semibold">{t('sidebar.navigation')}</h2>
-              <p className="text-sm text-muted-foreground">{t('sidebar.monitoringSystem')}</p>
+              <h2 className="text-lg font-semibold">Navigation</h2>
+              <p className="text-sm text-muted-foreground">Flood Monitoring System</p>
             </motion.div>
           )}
           {!isMobile && (
@@ -238,7 +257,7 @@ export function Sidebar({
                   <Search className="w-4 h-4 text-muted-foreground ml-3.5 shrink-0 group-hover:text-primary transition-colors" />
                   <input
                     type="text"
-                    placeholder={t('common.searchPlaceholderShort')}
+                    placeholder="Search..."
                     className="w-full pl-3 pr-4 py-2.5 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none truncate"
                     onClick={() => setCommandOpen(true)}
                     readOnly
@@ -296,8 +315,7 @@ export function Sidebar({
                   )}
                   {!isCollapsed && (
                     <>
-
-                      <span className="ml-3">{t(`sidebar.${item.label}`)}</span>
+                      <span className="ml-3">{getNavLabel(item.label)}</span>
                       {badgeValue !== undefined && badgeValue > 0 && (
                         <Badge variant="danger" size="sm" className="ml-auto">
                           {badgeValue}
@@ -330,7 +348,7 @@ export function Sidebar({
               transition={{ delay: 0.2 }}
               className="text-sm font-medium text-muted-foreground mb-3"
             >
-              {t('sidebar.quickActions')}
+              Quick Actions
             </motion.h3>
           )}
           <div
@@ -353,7 +371,7 @@ export function Sidebar({
                   onClick={action.id === 'current-weather' ? onShowWeatherPopup : action.onClick}
                 >
                   <action.icon className={cn('h-4 w-4', action.color)} />
-                  {!isCollapsed && <span className="ml-2">{t(`sidebar.${action.label}`)}</span>}
+                  {!isCollapsed && <span className="ml-2">{getActionLabel(action.label)}</span>}
                 </Button>
               </motion.div>
             ))}
@@ -370,7 +388,7 @@ export function Sidebar({
             onClick={() => handleNavigate('/settings')}
           >
             <Settings className="h-4 w-4 text-muted-foreground" />
-            {!isCollapsed && <span className="ml-3">{t('sidebar.settings')}</span>}
+            {!isCollapsed && <span className="ml-3">Settings</span>}
           </Button>
         </div>
       </motion.aside>

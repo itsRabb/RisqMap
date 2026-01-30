@@ -103,6 +103,7 @@ function transformShelter(feature: FEMAShelterFeature): Shelter {
 
 /**
  * Fetch real-time shelter data from FEMA National Shelter System
+ * via Supabase Edge Function proxy to bypass CORS
  * API: https://gis.fema.gov/arcgis/rest/services/NSS/OpenShelters/MapServer/0
  */
 export async function fetchFEMAShelters(options?: {
@@ -111,24 +112,21 @@ export async function fetchFEMAShelters(options?: {
   bounds?: { north: number; south: number; east: number; west: number };
 }): Promise<Shelter[]> {
   try {
-    const baseUrl = 'https://gis.fema.gov/arcgis/rest/services/NSS/OpenShelters/MapServer/0/query';
+    // Use Supabase Edge Function proxy to bypass CORS
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const baseUrl = supabaseUrl 
+      ? `${supabaseUrl}/functions/v1/fema-shelters`
+      : '/api/fema-shelters'; // Fallback to Next.js API route
     
     // Build query parameters
-    const params = new URLSearchParams({
-      outFields: '*',
-      returnGeometry: 'true',
-      f: 'geojson',
-    });
-    
-    // Build WHERE clause based on filters
-    const whereClauses: string[] = ['1=1']; // Always true base clause
+    const params = new URLSearchParams();
     
     if (options?.status && options.status !== 'ALL') {
-      whereClauses.push(`shelter_status='${options.status}'`);
+      params.set('status', options.status);
     }
     
     if (options?.state) {
-      whereClauses.push(`state='${options.state}'`);
+      params.set('state', options.state);
     }
     
     // Add spatial filter if bounds provided
@@ -145,18 +143,20 @@ export async function fetchFEMAShelters(options?: {
       params.set('spatialRel', 'esriSpatialRelIntersects');
     }
     
-    params.set('where', whereClauses.join(' AND '));
-    
     const url = `${baseUrl}?${params.toString()}`;
     
-    console.log('[FEMA Shelters] Fetching from:', url);
+    console.log('[FEMA Shelters] Fetching from proxy:', url);
     
     const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
       next: { revalidate: 300 }, // Cache for 5 minutes
     });
     
     if (!response.ok) {
-      throw new Error(`FEMA API returned ${response.status}: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Proxy returned ${response.status}: ${errorText}`);
     }
     
     const data: FEMAShelterResponse = await response.json();

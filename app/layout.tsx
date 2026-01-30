@@ -8,7 +8,6 @@ import { AlertCountProvider } from '@/components/contexts/AlertCountContext';
 import 'leaflet/dist/leaflet.css';
 import ReactQueryProvider from '@/components/providers/ReactQueryProvider';
 import ClientLayoutWrapper from '@/components/layout/ClientLayoutWrapper';
-import { LanguageProvider } from '@/src/context/LanguageContext';
 import { Analytics } from "@vercel/analytics/next";
 
 // font
@@ -43,9 +42,7 @@ export default function RootLayout({
         <ReactQueryProvider>
           <ThemeProvider>
             <AlertCountProvider>
-              <LanguageProvider>
-                <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-              </LanguageProvider>
+              <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
               <Toaster
                 position="top-right"
                 toastOptions={{

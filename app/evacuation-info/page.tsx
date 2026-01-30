@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 import { EvacuationLocation } from '@/types'; // Ensure this type is updated in types/index.ts
 import dynamic from 'next/dynamic';
-import { useLanguage } from '@/src/context/LanguageContext';
 
 // Dynamic imports for Leaflet components to avoid SSR issues
 const MapContainer = dynamic<any>(
@@ -47,7 +46,6 @@ const DEFAULT_MAP_CENTER: [number, number] = [39.8283, -98.5795]; // Center of C
 const DEFAULT_MAP_ZOOM = 4; // Zoom level to show entire United States
 
 export default function EvacuationInfoPage() {
-  const { t, lang } = useLanguage();
   const [evacuationLocations, setEvacuationLocations] = useState<EvacuationLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,23 +109,23 @@ export default function EvacuationInfoPage() {
 
   const getStatusBadge = (location: EvacuationLocation) => {
     const percentage = (location.capacity_current / location.capacity_total) * 100;
-    if (percentage >= 100) return { text: t('evacuationInfo.status.full'), color: 'bg-red-500/20 text-red-400 border-red-500/30' };
-    if (percentage >= 70) return { text: t('evacuationInfo.status.almostFull'), color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
-    return { text: t('evacuationInfo.status.available'), color: 'bg-green-500/20 text-green-400 border-green-500/30' };
+    if (percentage >= 100) return { text: 'Full', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+    if (percentage >= 70) return { text: 'Almost Full', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
+    return { text: 'Available', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
   };
   const getOperationalStatusBadge = (status: string) => {
     // Basic mapping based on common status string content; ideally the backend returns a status code
     const lowerStatus = status.toLowerCase();
     if (lowerStatus.includes('open')) {
-      return { text: t('evacuationInfo.status.open'), color: 'bg-green-500/20 text-green-400 border-green-500/30', icon: <CheckCircle className="w-4 h-4" /> };
+      return { text: 'Open', color: 'bg-green-500/20 text-green-400 border-green-500/30', icon: <CheckCircle className="w-4 h-4" /> };
     }
     if (lowerStatus.includes('full')) {
-      return { text: t('evacuationInfo.status.full'), color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: <XCircle className="w-4 h-4" /> };
+      return { text: 'Full', color: 'bg-red-500/20 text-red-400 border-red-500/30', icon: <XCircle className="w-4 h-4" /> };
     }
     if (lowerStatus.includes('closed')) {
-      return { text: t('evacuationInfo.status.closed'), color: 'bg-orange-500/20 text-orange-400 border-orange-500/30', icon: <AlertTriangle className="w-4 h-4" /> };
+      return { text: 'Closed', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30', icon: <AlertTriangle className="w-4 h-4" /> };
     }
-    return { text: t('evacuationInfo.status.na'), color: 'bg-slate-500/20 text-slate-400 border-slate-500/30', icon: <Info className="w-4 h-4" /> };
+    return { text: 'N/A', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30', icon: <Info className="w-4 h-4" /> };
   };
 
   const getServiceIcon = (serviceKey: string, status: string) => {
@@ -146,19 +144,19 @@ export default function EvacuationInfoPage() {
   // NEW COMPONENT: To display capacity status legend
   const StatusLegend = () => (
     <div className="bg-slate-100 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-600/30 rounded-lg p-3 mb-4 text-xs">
-      <h5 className="font-semibold text-slate-900 dark:text-white mb-2">{t('evacuationInfo.list.legendTitle')}</h5>
+      <h5 className="font-semibold text-slate-900 dark:text-white mb-2">Status Legend</h5>
       <div className="flex flex-col space-y-1.5">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0 border border-slate-300 dark:border-slate-400/50" />
-          <span className="text-slate-600 dark:text-slate-300">{t('evacuationInfo.list.legendAvailable')}</span>
+          <span className="text-slate-600 dark:text-slate-300">Available (0-70%)</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-orange-400 flex-shrink-0 border border-slate-300 dark:border-slate-400/50" />
-          <span className="text-slate-600 dark:text-slate-300">{t('evacuationInfo.list.legendAlmostFull')}</span>
+          <span className="text-slate-600 dark:text-slate-300">Almost Full (70-99%)</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0 border border-slate-300 dark:border-slate-400/50" />
-          <span className="text-slate-600 dark:text-slate-300">{t('evacuationInfo.list.legendFull')}</span>
+          <span className="text-slate-600 dark:text-slate-300">Full (100%)</span>
         </div>
       </div>
     </div>
@@ -170,8 +168,8 @@ export default function EvacuationInfoPage() {
         <div className="flex justify-center items-center min-h-[60vh]">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-cyan-500/30 dark:border-cyan-400/30 border-t-cyan-600 dark:border-t-cyan-400 rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-xl font-medium text-slate-900 dark:text-white">{t('evacuationInfo.loading.title')}</p>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">{t('evacuationInfo.loading.subtitle')}</p>
+            <p className="text-xl font-medium text-slate-900 dark:text-white">Loading Evacuation Centers</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">Please wait while we fetch the latest data...</p>
           </div>
         </div>
       </motion.div>
@@ -183,9 +181,9 @@ if (error) {
         <div className="flex flex-col justify-center items-center min-h-[60vh]">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 rounded-xl p-8 text-center">
             <XCircle className="h-16 w-16 text-red-500 dark:text-red-400 mx-auto mb-4" />
-            <p className="text-xl font-medium text-slate-900 dark:text-white mb-2">{t('evacuationInfo.error.title')}</p>
+            <p className="text-xl font-medium text-slate-900 dark:text-white mb-2">Error Loading Data</p>
             <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-            <p className="text-slate-500 dark:text-slate-400">{t('evacuationInfo.error.retry')}</p>
+            <p className="text-slate-500 dark:text-slate-400">Please try again later or contact support</p>
           </div>
         </div>
       </motion.div>
@@ -202,7 +200,7 @@ if (error) {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">RisqMap</h1>
-            <p className="text-cyan-600 dark:text-cyan-400 text-sm">{t('evacuationInfo.title')}</p>
+            <p className="text-cyan-600 dark:text-cyan-400 text-sm">Evacuation Centers & Shelters</p>
           </div>
         </div>
       </motion.div>
@@ -215,7 +213,7 @@ if (error) {
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center"><Home className="w-5 h-5 text-blue-600 dark:text-blue-400" /></div>
               <div>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white">{evacuationLocations.length}</p>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">{t('evacuationInfo.stats.totalLocations')}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Total Locations</p>
               </div>
             </div>
           </motion.div>
@@ -224,7 +222,7 @@ if (error) {
               <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center"><Users className="w-5 h-5 text-green-600 dark:text-green-400" /></div>
               <div>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white">{evacuationLocations.reduce((acc, loc) => acc + (loc.capacity_total - loc.capacity_current), 0)}</p>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">{t('evacuationInfo.stats.remainingCapacity')}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Remaining Capacity</p>
               </div>
             </div>
           </motion.div>
@@ -233,7 +231,7 @@ if (error) {
               <div className="w-10 h-10 bg-orange-100 dark:bg-orange-500/20 rounded-lg flex items-center justify-center"><AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400" /></div>
               <div>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white">{evacuationLocations.filter((loc) => (loc.capacity_current / loc.capacity_total) >= 0.7).length}</p>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">{t('evacuationInfo.stats.almostFull')}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Almost Full</p>
               </div>
             </div>
           </motion.div>
@@ -242,7 +240,7 @@ if (error) {
               <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center"><Clock className="w-5 h-5 text-cyan-600 dark:text-cyan-400" /></div>
               <div>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white">Live</p>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">{t('evacuationInfo.stats.liveUpdate')}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Live Updates</p>
               </div>
             </div>
           </motion.div>
@@ -252,7 +250,7 @@ if (error) {
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{t('evacuationInfo.map.title')}</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Evacuation Centers Map</h3>
             </div>
             <div className="h-[520px] w-full rounded-lg overflow-hidden border border-slate-600/30">
               {L && evacuationIcon && (
@@ -263,7 +261,7 @@ if (error) {
                       <Popup>
                         <div className="text-sm">
                           <p className="font-bold">{loc.name}</p>
-                          <button onClick={() => handleLocationClick(loc)} className="text-cyan-500 hover:underline mt-1">{t('evacuationInfo.map.viewDetail')}</button>
+                          <button onClick={() => handleLocationClick(loc)} className="text-cyan-500 hover:underline mt-1">View Details</button>
                         </div>
                       </Popup>
                     </Marker>
@@ -279,12 +277,12 @@ if (error) {
           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 rounded-xl p-6">
             <div className="flex items-center gap-2 mb-4">
               <Home className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{t('evacuationInfo.list.title')}</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Evacuation Centers List</h3>
             </div>
 
             <StatusLegend />
 {evacuationLocations.length === 0 && !loading ? (
-              <p className="text-slate-400 text-center py-8">{t('evacuationInfo.list.noData')}</p>
+              <p className="text-slate-400 text-center py-8">No evacuation centers found</p>
             ) : (
               <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                 {evacuationLocations.map((loc, index) => {
@@ -338,7 +336,7 @@ if (error) {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <Shield className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />
-                        <span className="text-slate-900 dark:text-white font-medium">{t('evacuationInfo.details.operationalStatus')}</span>
+                        <span className="text-slate-900 dark:text-white font-medium">Operational Status</span>
                       </div>
                       {selectedLocation.operational_status && (
                         <span className={`px-3 py-1 rounded-full text-sm border flex items-center gap-1.5 ${getOperationalStatusBadge(selectedLocation.operational_status).color}`}>
@@ -351,14 +349,14 @@ if (error) {
                     <div className="flex items-center justify-between mt-4 mb-2">
                       <div className="flex items-center gap-2">
                         <Users className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                        <span className="text-slate-900 dark:text-white font-medium">{t('evacuationInfo.details.capacity')}</span>
+                        <span className="text-slate-900 dark:text-white font-medium">Capacity</span>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-sm border ${getStatusBadge(selectedLocation).color}`}>
                         {getStatusBadge(selectedLocation).text}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">{t('evacuationInfo.details.filled')}:</span>
+                      <span className="text-slate-500 dark:text-slate-400">Currently Filled:</span>
                       <span className="text-slate-900 dark:text-white font-medium">{selectedLocation.capacity_current} / {selectedLocation.capacity_total}</span>
                     </div>
                     <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2 mt-2">
@@ -369,7 +367,7 @@ if (error) {
                     <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 border border-slate-200 dark:border-slate-600/30">
                       <h4 className="text-slate-900 dark:text-white font-medium mb-3 flex items-center gap-2">
                         <Info className="w-5 h-5 text-green-500 dark:text-green-400" />
-                        {t('evacuationInfo.details.essentialServices')}
+                        Essential Services
                       </h4>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         {Object.entries(selectedLocation.essential_services).map(([key, value]) => (
@@ -386,7 +384,7 @@ if (error) {
                     <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 border border-slate-200 dark:border-slate-600/30">
                       <h4 className="text-slate-900 dark:text-white font-medium mb-3 flex items-center gap-2">
                         <CheckCircle className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                        {t('evacuationInfo.details.facilities')}
+                        Facilities
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {selectedLocation.facilities.map((facility, idx) => (
@@ -400,30 +398,30 @@ if (error) {
 <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 space-y-3 border border-slate-200 dark:border-slate-600/30">
                     <h4 className="text-slate-900 dark:text-white font-medium mb-2 flex items-center gap-2">
                       <Phone className="w-5 h-5 text-orange-500 dark:text-orange-400" />
-                      {t('evacuationInfo.details.contactInfo')}
+                      Contact Information
                     </h4>
                     {selectedLocation.contact_person && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500 dark:text-slate-400">{t('evacuationInfo.details.contactPerson')}:</span>
+                        <span className="text-slate-500 dark:text-slate-400">Contact Person:</span>
                         <span className="text-slate-900 dark:text-white">{selectedLocation.contact_person}</span>
                       </div>
                     )}
                     {selectedLocation.contact_phone && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-400">{t('evacuationInfo.details.phone')}:</span>
+                        <span className="text-slate-400">Phone:</span>
                         <a href={`tel:${selectedLocation.contact_phone}`} className="text-cyan-400 hover:text-cyan-300 transition-colors">{selectedLocation.contact_phone}</a>
                       </div>
                     )}
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-700/50 space-y-2">
                       {selectedLocation.last_updated && (
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500">{t('evacuationInfo.details.lastUpdated')}:</span>
+                          <span className="text-slate-500">Last Updated:</span>
                           <span className="text-slate-500 dark:text-slate-400">{new Date(selectedLocation.last_updated).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                       )}
                       {selectedLocation.verified_by && (
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500">{t('evacuationInfo.details.verifiedBy')}:</span>
+                          <span className="text-slate-500">Verified By:</span>
                           <span className="text-slate-900 dark:text-white font-medium">{selectedLocation.verified_by}</span>
                         </div>
                       )}
@@ -432,7 +430,7 @@ if (error) {
 
                   <button onClick={() => openGoogleMaps(selectedLocation.latitude, selectedLocation.longitude)} className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
                     <ExternalLink className="w-5 h-5" />
-                    {t('evacuationInfo.details.navigate')}
+                    Navigate to Location
                   </button>
                 </div>
               </div>

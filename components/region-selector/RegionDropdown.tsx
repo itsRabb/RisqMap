@@ -18,7 +18,6 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { useLanguage } from '@/src/context/LanguageContext';
 import {
   Popover,
   PopoverContent,
@@ -93,7 +92,6 @@ function RegionSelectField({
 }: RegionSelectFieldProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
-  const { t } = useLanguage();
 
   const open = isOpen !== undefined ? isOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
@@ -103,7 +101,7 @@ function RegionSelectField({
       <Command className="bg-transparent">
         <div className="px-3 py-2 border-b border-slate-100 dark:border-gray-700">
           <CommandInput
-            placeholder={`${t('common.searchPlaceholder')}`}
+            placeholder="Search..."
             className="h-9 border-0 bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:ring-0"
             autoFocus={isDesktop}
           />
@@ -186,7 +184,7 @@ function RegionSelectField({
       <div className="flex items-center gap-2 truncate">
         {icon}
         <span className={`truncate ${currentDisplayName ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-gray-400'}`}>
-          {currentDisplayName || `${t('landing.selectLocation')} ${placeholder}`}
+          {currentDisplayName || `Select ${placeholder}`}
         </span>
       </div>
       <ChevronDown
@@ -232,7 +230,7 @@ function RegionSelectField({
           <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-slate-200 dark:bg-gray-700 mt-4 mb-2" />
           <DrawerHeader>
             <DrawerTitle className="text-center font-semibold text-slate-900 dark:text-white">
-              {t('regionSelector.title')} - {placeholder}
+              Select Region - {placeholder}
             </DrawerTitle>
           </DrawerHeader>
           <div className="p-2 pb-8">
@@ -264,7 +262,6 @@ export function RegionDropdown({
   activeFloodCount = 0,
 }: RegionDropdownProps) {
   const router = useRouter();
-  const { t } = useLanguage();
   const [activeField, setActiveField] = useState<'province' | 'regency' | 'district' | null>(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [selectedProvinceCode, setSelectedProvinceCode] = useState<
@@ -486,10 +483,10 @@ export function RegionDropdown({
                 <MapPin className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                 <div>
                   <h3 className="text-lg font-semibold leading-none tracking-tight">
-                    {t('regionSelector.title')}
+                    Select Location
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {t('regionSelector.subtitle')}
+                    Choose your region for detailed flood information
                   </p>
                 </div>
               </div>
@@ -521,7 +518,7 @@ export function RegionDropdown({
               <RegionSelectField
                 selectedValue={selectedProvinceCode}
                 onValueChange={handleProvinceChange}
-                placeholder={t('regionSelector.province')}
+                placeholder="Province"
                 loading={loadingProvinces}
                 disabled={loadingProvinces}
                 data={provinces}
@@ -536,7 +533,7 @@ export function RegionDropdown({
               <RegionSelectField
                 selectedValue={selectedRegencyCode}
                 onValueChange={handleRegencyChange}
-                placeholder={t('regionSelector.city')}
+                placeholder="City/Regency"
                 loading={loadingRegencies}
                 disabled={!selectedProvinceCode || loadingRegencies}
                 data={regencies}
@@ -551,7 +548,7 @@ export function RegionDropdown({
               <RegionSelectField
                 selectedValue={selectedDistrictCode}
                 onValueChange={handleDistrictChange}
-                placeholder={t('regionSelector.district')}
+                placeholder="District"
                 loading={loadingDistricts}
                 disabled={!selectedRegencyCode || loadingDistricts}
                 data={districts}
@@ -570,24 +567,24 @@ export function RegionDropdown({
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle className="h-5 w-5 text-green-500 dark:text-green-400" />
                   <h4 className="text-sm font-semibold text-green-600 dark:text-green-400">
-                    {t('regionSelector.successTitle')}
+                    Location Selected Successfully
                   </h4>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-green-200/50 dark:border-green-800/50 pb-2 last:border-0 last:pb-0">
-                    <span className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 font-medium">{t('regionSelector.province')}</span>
+                    <span className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 font-medium">Province</span>
                     <span className="text-sm sm:text-sm text-slate-900 dark:text-white font-bold text-left sm:text-right break-words w-full sm:w-auto">
                       {displayProvinceName}
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 border-b border-green-200/50 dark:border-green-800/50 pb-2 last:border-0 last:pb-0">
-                    <span className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 font-medium">{t('regionSelector.city')}</span>
+                    <span className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 font-medium">City/Regency</span>
                     <span className="text-sm sm:text-sm text-slate-900 dark:text-white font-bold text-left sm:text-right break-words w-full sm:w-auto">
                       {displayRegencyName}
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
-                    <span className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 font-medium">{t('regionSelector.district')}</span>
+                    <span className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 font-medium">District</span>
                     <span className="text-sm sm:text-sm text-slate-900 dark:text-white font-bold text-left sm:text-right break-words w-full sm:w-auto">
                       {displayDistrictName}
                     </span>
@@ -598,7 +595,7 @@ export function RegionDropdown({
                     className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white"
                   >
                     <span className="flex items-center justify-center">
-                      {t('regionSelector.viewFloodMap')}
+                      View Flood Map
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </span>
                   </Button>
@@ -627,12 +624,12 @@ export function RegionDropdown({
                 <Map className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold leading-none tracking-tight">
-                    {t('weatherInsight.title')}
+                    Weather Insight
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {selectedLocation?.districtName
-                      ? t('weatherInsight.subtitle')
-                      : t('weatherInsight.subtitle')}
+                      ? 'Real-time weather data for your area'
+                      : 'Real-time weather data for your area'}
                   </p>
                 </div>
               </div>
@@ -687,7 +684,7 @@ export function RegionDropdown({
                     className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 w-full sm:w-auto min-w-[140px]"
                   >
                     <Eye className="mr-2 h-4 w-4" />
-                    {t('landing.openMap')}
+                    Open Map
                   </Button>
                 </div>
               ) : (

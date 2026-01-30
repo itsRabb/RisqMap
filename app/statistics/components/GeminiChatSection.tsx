@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useLanguage } from '@/src/context/LanguageContext';
 import Image from 'next/image';
 import {
   Bot,
@@ -43,7 +42,6 @@ export default function GeminiChatSection({
   isGeminiLoading,
   handleGeminiAnalysis,
 }: GeminiChatSectionProps) {
-  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -54,20 +52,20 @@ export default function GeminiChatSection({
   // Welcome message with new UI
   const welcomeMessage: ChatMessage = useMemo(() => ({
     id: 'welcome',
-    text: t('statistics.gemini.welcome'),
+    text: '👋 Welcome to RisqMap Assistant!\n\nI can help you analyze:\n• Real-time flood status\n• Weather prediction and risk\n• Emergency action recommendations\n• Affected area information\n\nIs there anything you want to ask?',
     isUser: false,
     timestamp: new Date(),
     type: 'info',
-  }), [t]);
+  }), []);
 
   // Suggestions with new UI structure (array of objects)
   const suggestions = [
-    { text: t('statistics.gemini.suggestions.floodStatus'), icon: <MapPin className="w-4 h-4" /> },
-    { text: t('statistics.gemini.suggestions.weather'), icon: <Cloud className="w-4 h-4" /> },
-    { text: t('statistics.gemini.suggestions.risk'), icon: <AlertTriangle className="w-4 h-4" /> },
-    { text: t('statistics.gemini.suggestions.evacuation'), icon: <Activity className="w-4 h-4" /> },
-    { text: t('statistics.gemini.suggestions.trend'), icon: <TrendingUp className="w-4 h-4" /> },
-    { text: t('statistics.gemini.suggestions.pumps'), icon: <Droplets className="w-4 h-4" /> }
+    { text: 'Flood status in my area', icon: <MapPin className="w-4 h-4" /> },
+    { text: "Today's weather forecast", icon: <Cloud className="w-4 h-4" /> },
+    { text: 'Flood risk level', icon: <AlertTriangle className="w-4 h-4" /> },
+    { text: 'Evacuation recommendations', icon: <Activity className="w-4 h-4" /> },
+    { text: '5-day trend analysis', icon: <TrendingUp className="w-4 h-4" /> },
+    { text: 'Pump station condition', icon: <Droplets className="w-4 h-4" /> }
   ];
 
   // Initialize with welcome message when opened
@@ -261,7 +259,7 @@ export default function GeminiChatSection({
                               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
                               <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                             </div>
-                            <span className="text-sm text-slate-600 dark:text-slate-300">{t('statistics.gemini.analyzing')}</span>
+                            <span className="text-sm text-slate-600 dark:text-slate-300">Analyzing system data...</span>
                           </div>
                         </div>
                       </motion.div>
@@ -279,7 +277,7 @@ export default function GeminiChatSection({
                     >
                       <p className="text-slate-500 dark:text-slate-400 text-xs mb-3 font-semibold flex items-center">
                         <Zap className="w-3 h-3 mr-1" />
-                        {t('statistics.gemini.suggestions.quickAction')}
+                        {' QUICK ACTION'}
                       </p>
                       <div className="grid grid-cols-2 gap-2">
                         {suggestions.map((suggestion, index) => (
@@ -307,7 +305,7 @@ export default function GeminiChatSection({
                       <div className="flex-1 relative">
                         <input
                           type="text"
-                          placeholder={t('statistics.gemini.inputPlaceholder')}
+                          placeholder="Ask about flood conditions, weather, or evacuation..."
                           className="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600/50 focus:border-cyan-500/50 rounded-2xl px-4 py-3 pr-12 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all duration-200"
                           value={geminiQuestion}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGeminiQuestion(e.target.value as string)}
@@ -332,7 +330,7 @@ export default function GeminiChatSection({
                     </div>
                     <div className="flex items-center justify-center space-x-2 mt-3 text-xs text-slate-500">
                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                      <span>{t('statistics.gemini.systemInfo')}</span>
+                      <span>Connected to RisqMap system</span>
                     </div>
                   </div>
                 </>

@@ -14,7 +14,6 @@ import Image from 'next/image';
 
 // State Management
 import { useAppStore } from '@/lib/store';
-import { useLanguage } from '@/src/context/LanguageContext';
 
 // UI Components
 import { WeatherDisplay } from '@/components/weather/WeatherDisplay';
@@ -107,7 +106,6 @@ const FloodReportChart = dynamic(
 export function DashboardClientPage({ initialData }) {
   const { selectedLocation, mapBounds, setSelectedLocation, setMapBounds } =
     useAppStore();
-  const { t } = useLanguage();
 
   const [weatherSummary, setWeatherSummary] = useState(
     initialData.weatherSummary || null,
@@ -360,39 +358,39 @@ export function DashboardClientPage({ initialData }) {
   const heroCards = useMemo(
     () => [
       {
-        title: t('landing.totalRegions'),
-        description: t('landing.descTotalRegions'),
+        title: 'Total Regions',
+        description: 'Monitored areas across the United States',
         count: initialData.stats.totalRegions,
         icon: MapPin,
         color: 'text-blue-400',
         bgColor: 'bg-blue-500/20',
       },
       {
-        title: t('landing.activeAlerts'),
-        description: t('landing.descActiveAlerts'),
+        title: 'Active Alerts',
+        description: 'Real-time flood warnings',
         count: initialData.stats.activeAlerts,
         icon: Bell,
         color: 'text-amber-400',
         bgColor: 'bg-amber-500/20',
       },
       {
-        title: t('landing.floodZones'),
-        description: t('landing.descFloodZones'),
+        title: 'Flood Zones',
+        description: 'High-risk flood areas',
         count: initialData.stats.floodZones,
         icon: Shield,
         color: 'text-red-400',
         bgColor: 'bg-red-500/20',
       },
       {
-        title: t('landing.peopleAtRisk'),
-        description: t('landing.descPeopleAtRisk'),
+        title: 'People at Risk',
+        description: 'Population in danger zones',
         count: formatPopulation(initialData.stats.peopleAtRisk),
         icon: Users,
         color: 'text-purple-400',
         bgColor: 'bg-purple-500/20',
       },
     ],
-    [initialData.stats, t],
+    [initialData.stats],
   );
 
   const sendChatMessage = async (message: string) => {
@@ -578,7 +576,7 @@ export function DashboardClientPage({ initialData }) {
               </div>
 
               <p className="text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mt-4">
-                {t('landing.heroSubtitle')}
+                Real-time Flood Monitoring and Early Warning System for the United States
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 max-w-xs sm:max-w-md mx-auto">
@@ -589,7 +587,7 @@ export function DashboardClientPage({ initialData }) {
                     className="w-full sm:w-auto"
                   >
                     <MapPin className="mr-2 h-5 w-5" />
-                    {t('landing.selectLocation')}
+                    Select Location
                   </Button>
                 </Link>
                 <Link href="/warning">
@@ -599,7 +597,7 @@ export function DashboardClientPage({ initialData }) {
                     className="bg-transparent text-white border-white/50 hover:bg-white/10 w-full sm:w-auto"
                   >
                     <Bell className="mr-2 h-5 w-5" />
-                    {t('landing.latestAlerts')}
+                    Latest Alerts
                   </Button>
                 </Link>
               </div>
@@ -699,16 +697,16 @@ export function DashboardClientPage({ initialData }) {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <MapPin className="h-8 w-8 text-primary" />
-                      <span className="text-2xl text-slate-900 dark:text-white">{t('landing.interactiveMap')}</span>
+                      <span className="text-2xl text-slate-900 dark:text-white">Interactive Flood Map</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 dark:text-slate-400 mb-6">
-                      {t('landing.mapDescription')}
+                      Visualize real-time flood zones and high-risk areas on an interactive map
                     </p>
                     <Button size="lg" onClick={() => setMapDrawerOpen(true)}>
                       <Eye className="mr-2 h-5 w-5" />
-                      {t('landing.openMap')}
+                      Open Map
                     </Button>
                   </CardContent>
                 </Card>
@@ -725,7 +723,7 @@ export function DashboardClientPage({ initialData }) {
                     <CardTitle className="flex items-center space-x-2">
                       <MapPin className="h-5 w-5 text-primary" />
                       <span className="text-gray-900 dark:text-gray-100">
-                        {t('dashboard.floodMapTitle')} -{' '}
+                        Flood Map -{' '}
                         {selectedLocation?.districtName || 'United States'}
                       </span>
                       <Badge variant="success" className="ml-auto">
@@ -738,7 +736,7 @@ export function DashboardClientPage({ initialData }) {
                         className="ml-2"
                       >
                         <RotateCcw className="h-4 w-4 mr-1" />
-                        {t('landing.updateData')}
+                        Update Data
                       </Button>
                     </CardTitle>
                   </CardHeader>
@@ -779,7 +777,7 @@ export function DashboardClientPage({ initialData }) {
               ) : isLoadingWidgets ? (
                 <Card className="flex h-full min-h-[150px] flex-col items-center justify-center p-6 bg-white/80 dark:bg-slate-900/80 border-slate-200/50 dark:border-slate-800/50">
                   <Loader2 className="h-8 w-8 animate-spin text-cyan-400 mb-3" />
-                  <p className="text-slate-900 dark:text-white">{t('landing.loadingWeather')}</p>
+                  <p className="text-slate-900 dark:text-white">Loading weather data...</p>
                 </Card>
               ) : weatherSummary || airQuality ? (
                 <>
@@ -808,10 +806,10 @@ export function DashboardClientPage({ initialData }) {
                 <Card className="flex h-full min-h-[150px] flex-col items-center justify-center text-center p-6 bg-white/80 dark:bg-slate-900/80 border-slate-200/50 dark:border-slate-800/50">
                   <Info className="h-8 w-8 text-yellow-500 dark:text-yellow-400 mb-3" />
                   <h4 className="text-slate-900 dark:text-white font-semibold mb-1">
-                    {t('landing.dataUnavailable')}
+                    Data Unavailable
                   </h4>
                   <p className="text-slate-500 dark:text-slate-400 text-sm">
-                    {t('landing.unavailableDesc')}
+                    Weather data could not be loaded for this location
                   </p>
                 </Card>
               )}
@@ -839,11 +837,11 @@ export function DashboardClientPage({ initialData }) {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center space-x-2">
                     <Bell className="h-5 w-5 text-warning" />
-                    <span>{t('landing.latestDisasterAlerts')}</span>
+                    <span>Latest Disaster Alerts</span>
                   </CardTitle>
                   <Link href="/warning">
                     <Button variant="outline" size="sm">
-                      <span>{t('landing.viewDetail')}</span>
+                      <span>View Details</span>
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>

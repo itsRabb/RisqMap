@@ -7,7 +7,6 @@ import { id } from 'date-fns/locale';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { normalizeSeries, ChartRow } from '@/lib/utils';
 import { safeFetch, UserFriendlyError } from '@/lib/error-utils';
-import { useLanguage } from '@/src/context/LanguageContext';
 
 interface FloodReportData {
   hour: string;
@@ -17,7 +16,6 @@ interface FloodReportData {
 const DATA_KEYS = ['count'];
 
 const FloodReportChart: React.FC = () => {
-  const { t } = useLanguage();
   const [chartData, setChartData] = useState<FloodReportData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +30,7 @@ const FloodReportChart: React.FC = () => {
       const reports: { id: string; timestamp: string; }[] = await safeFetch(
         '/api/laporan',
         undefined,
-        t('sensorData.errorTitle') // Using translated error title as fallback
+        'Error Loading Data' // Using translated error title as fallback
       );
 
       // Filter reports for the last 24 hours
@@ -76,7 +74,7 @@ const FloodReportChart: React.FC = () => {
       if (err instanceof UserFriendlyError) {
         setError(err.message);
       } else {
-        setError(t('sensorData.errorMessage').replace('{message}', 'Unknown error'));
+        setError('Failed to load flood reports: Unknown error');
       }
       console.error('Error fetching hourly flood reports:', err);
     } finally {
@@ -95,7 +93,7 @@ const FloodReportChart: React.FC = () => {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 text-center shadow-sm">
         <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-cyan-600 dark:text-cyan-400 mx-auto mb-3" />
-        <p className="text-sm sm:text-base text-slate-500 dark:text-gray-400">{t('sensorData.statistics.title')}...</p>
+        <p className="text-sm sm:text-base text-slate-500 dark:text-gray-400">Loading statistics...</p>
       </div>
     );
   }
@@ -103,14 +101,14 @@ if (error) {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 text-center shadow-sm">
         <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 dark:text-red-400 mx-auto mb-3" />
-        <p className="text-sm sm:text-base text-red-500 dark:text-red-400">{t('sensorData.errorTitle')}: {error}</p>
+        <p className="text-sm sm:text-base text-red-500 dark:text-red-400">Error: {error}</p>
       </div>
     );
   }
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
-      <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white mb-4">{t('sensorData.reports.title')} (24h)</h3>
+      <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white mb-4">Flood Reports (24h)</h3>
       <ResponsiveContainer width="100%" height={300}>
         {chartData && chartData.length > 0 ? (
           <BarChart data={chartData} margin={{
@@ -128,13 +126,13 @@ if (error) {
               contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderColor: '#e2e8f0', borderRadius: '8px', color: '#0f172a' }}
               itemStyle={{ color: '#0f172a' }}
               cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }}
-              formatter={(value: number) => [`${value} ${t('sensorData.charts.reports')}`, t('sensorData.charts.total')]}
+              formatter={(value: number) => [`${value} Reports`, 'Total']}
             />
             <Bar dataKey="count" fill="#06B6D4" radius={[4, 4, 0, 0]} />
           </BarChart>
         ) : (
           <div className="flex items-center justify-center h-full text-sm sm:text-base text-slate-500">
-            {t('sensorData.charts.noData')}
+            No data available
           </div>
         )}
       </ResponsiveContainer>

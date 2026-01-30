@@ -63,7 +63,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 
 import { SelectedLocation } from '@/types/location';
-import { useLanguage } from '@/src/context/LanguageContext';
 
 // Read public API key available at build time for client usage.
 // Set `NEXT_PUBLIC_WEATHER_API_KEY` in your environment if you need map/weather tiles requiring a key.
@@ -143,15 +142,13 @@ interface WeatherDisplayProps {
 }
 
 const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
-  const { t, lang } = useLanguage();
-
   if (loading) {
     return (
       <Card className="h-full flex items-center justify-center bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl">
         <CardContent>
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-4" />
-            <p className="text-slate-400">{t('weather.loadingData')}</p>
+            <p className="text-slate-400">Loading weather data...</p>
           </div>
         </CardContent>
       </Card>
@@ -182,7 +179,7 @@ const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
           <div className="text-center py-8">
             <Cloud className="w-16 h-16 text-slate-600 mx-auto mb-4" />
             <p className="text-slate-400">
-              {t('weather.selectLocation')}
+              Select a location to view weather
             </p>
           </div>
         </CardContent>
@@ -200,12 +197,12 @@ const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
       <CardHeader>
         <CardTitle className="text-white flex items-center space-x-2">
           <Activity className="w-5 h-5 text-cyan-400" />
-          <span>{t('weather.currentWeather')}</span>
+          <span>Current Weather</span>
           <Badge
             variant="success"
             className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border bg-green-600/20 text-green-400 border-green-500/30"
           >
-            {t('weather.live')}
+            Live
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -220,12 +217,12 @@ const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
                 {Math.round(current.main?.temp || 0)}°  
               </div>
               <div className="text-slate-300 capitalize">
-                {current.weather?.[0]?.description || t('weather.unknown')}
+                {current.weather?.[0]?.description || 'Unknown'}
               </div>
             </div>
           </div>
           <div className="text-sm text-slate-400">
-            {t('weather.feelsLike')} {Math.round(current.main?.feels_like || 0)}°
+            Feels Like {Math.round(current.main?.feels_like || 0)}°
           </div>
         </div>
 
@@ -233,7 +230,7 @@ const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
           <div className="bg-slate-100/50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200/50 dark:border-slate-600/20 flex items-center space-x-3">
             <Droplets className="w-5 h-5 text-blue-400" />
             <div>
-              <span className="text-xs text-slate-500 dark:text-slate-400">{t('weather.humidity')}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Humidity</span>
               <div className="font-semibold text-slate-900 dark:text-white">
                 {current.main?.humidity ?? 'N/A'}%
               </div>
@@ -242,7 +239,7 @@ const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
           <div className="bg-slate-100/50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200/50 dark:border-slate-600/20 flex items-center space-x-3">
             <Wind className="w-5 h-5 text-green-400" />
             <div>
-              <span className="text-xs text-slate-500 dark:text-slate-400">{t('weather.wind')}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Wind</span>
               <div className="font-semibold text-slate-900 dark:text-white">
                 {current.wind?.speed !== undefined
                   ? `${current.wind.speed.toFixed(1)} m/s`
@@ -253,7 +250,7 @@ const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
           <div className="bg-slate-100/50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200/50 dark:border-slate-600/20 flex items-center space-x-3">
             <Gauge className="w-5 h-5 text-purple-400" />
             <div>
-              <span className="text-xs text-slate-500 dark:text-slate-400">{t('weather.pressure')}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Pressure</span>
               <div className="font-semibold text-slate-900 dark:text-white">
                 {current.main?.pressure ?? 'N/A'} hPa
               </div>
@@ -262,7 +259,7 @@ const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
           <div className="bg-slate-100/50 dark:bg-slate-700/30 rounded-xl p-4 border border-slate-200/50 dark:border-slate-600/20 flex items-center space-x-3">
             <Eye className="w-5 h-5 text-orange-400" />
             <div>
-              <span className="text-xs text-slate-500 dark:text-slate-400">{t('weather.visibility')}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Visibility</span>
               <div className="font-semibold text-slate-900 dark:text-white">
                 {current.visibility !== undefined
                   ? `${(current.visibility / 1000).toFixed(1)} km`
@@ -276,7 +273,7 @@ const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
           <div className="flex items-center space-x-2">
             <Sunrise className="w-6 h-6 text-yellow-400" />
             <div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">{t('weather.sunrise')}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">Sunrise</div>
               <div className="font-semibold text-slate-900 dark:text-white">
                 {current.sys?.sunrise
                   ? new Date(current.sys.sunrise * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
@@ -287,7 +284,7 @@ const WeatherDisplay = ({ data, loading, error }: WeatherDisplayProps) => {
           <div className="flex items-center space-x-2">
             <Sunset className="w-6 h-6 text-orange-500" />
             <div>
-              <div className="text-xs text-slate-400">{t('weather.sunset')}</div>
+              <div className="text-xs text-slate-400">Sunset</div>
               <div className="font-semibold text-slate-900 dark:text-white">
                 {current.sys?.sunset
                   ? new Date(current.sys.sunset * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
@@ -315,8 +312,6 @@ const DailyForecast = ({
   loading,
   error, // Destructure error prop
 }: DailyForecastProps) => {
-  const { t, lang } = useLanguage();
-
   // ✅ FIX: Check data.daily which now comes from endpoint 2.5/forecast
   if (loading) {
     return (
@@ -324,7 +319,7 @@ const DailyForecast = ({
         <CardContent>
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-4" />
-            <p className="text-slate-400">{t('weather.loadingForecast')}</p>
+            <p className="text-slate-400">Loading forecast...</p>
           </div>
         </CardContent>
       </Card>
@@ -355,7 +350,7 @@ const DailyForecast = ({
         <CardTitle className="text-slate-900 dark:text-white flex items-center space-x-2">
           <TrendingUp className="w-5 h-5 text-green-400" />
           {/* ✅ FIX: Title becomes 5 days old */}
-          <span>{t('weather.forecast5Days')}</span>
+          <span>5-Day Forecast</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -395,7 +390,6 @@ const DailyForecast = ({
 
 
 export default function WeatherForecastPage() {
-  const { t, lang } = useLanguage();
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>({
     name: 'New York, NY',
     latitude: 40.7128,
@@ -509,9 +503,9 @@ export default function WeatherForecastPage() {
             ? {
                 main: {
                   temp: Number(om.current.temperature ?? 0),
-                  feels_like: Number(om.current.temperature ?? 0), // Open‑Meteo doesn't provide feels_like
-                  humidity: undefined, // Not available in this endpoint; UI will show 'N/A'
-                  pressure: undefined,
+                  feels_like: Number((om.current as any).apparent_temperature ?? om.current.temperature ?? 0),
+                  humidity: Number((om.current as any).humidity ?? 0),
+                  pressure: Number((om.current as any).pressure ?? 0),
                 },
                 weather: [
                   {
@@ -524,6 +518,11 @@ export default function WeatherForecastPage() {
                   speed: Number(om.current.windspeed ?? 0),
                   deg: Number(om.current.winddirection ?? 0),
                 },
+                visibility: Number((om.current as any).visibility ?? 10000), // Default to 10km if not available
+                sys: {
+                  sunrise: (om.daily?.[0] as any)?.sunrise ? Math.floor(new Date((om.daily[0] as any).sunrise).getTime() / 1000) : undefined,
+                  sunset: (om.daily?.[0] as any)?.sunset ? Math.floor(new Date((om.daily[0] as any).sunset).getTime() / 1000) : undefined,
+                },
                 dt: om.current.time ? Math.floor(new Date(om.current.time).getTime() / 1000) : undefined,
               }
             : null;
@@ -532,6 +531,16 @@ export default function WeatherForecastPage() {
             ? om.daily.map((d: any) => ({
                 dt: d.dt ? Math.floor(new Date(d.dt).getTime() / 1000) : undefined,
                 temp: { max: d.temp_max ?? undefined, min: d.temp_min ?? undefined },
+                temp_max: d.temp_max ?? undefined,
+                temp_min: d.temp_min ?? undefined,
+                main: {
+                  temp_max: d.temp_max ?? undefined,
+                  temp_min: d.temp_min ?? undefined,
+                },
+                weather: [{
+                  description: 'N/A',
+                  icon: undefined,
+                }],
                 precipitation: d.precipitation,
               }))
             : [];
@@ -546,7 +555,7 @@ export default function WeatherForecastPage() {
           console.error('Error fetching weather data:', error);
           const errorMessage =
             error.response?.data?.error ||
-            t('weather.errors.fetchFailed');
+            'Failed to fetch weather data';
           setWeatherError(errorMessage);
         } finally {
           setLoadingWeather(false);
@@ -555,7 +564,7 @@ export default function WeatherForecastPage() {
 
       fetchWeatherData();
     }
-  }, [selectedLocation, lang]);
+  }, [selectedLocation]);
 
   const handleRegionSelect = (location: SelectedLocation) => {
     setSelectedLocation(location);
@@ -566,20 +575,20 @@ export default function WeatherForecastPage() {
     const trimmedQuery = searchQuery.trim();
 
     if (!trimmedQuery) {
-      setSearchLocationError(t('weather.errors.searchEmpty'));
+      setSearchLocationError('Please enter a location to search');
       return;
     }
 
     if (trimmedQuery.length < 2) {
       setSearchLocationError(
-        t('weather.errors.searchShort'),
+        'Search query must be at least 2 characters',
       );
       return;
     }
 
     if (trimmedQuery.length > 100) {
       setSearchLocationError(
-        t('weather.errors.searchLong'),
+        'Search query is too long',
       );
       return;
     }
@@ -588,7 +597,7 @@ export default function WeatherForecastPage() {
     const validCharactersRegex = /^[a-zA-Z0-9\s,.-]*$/;
     if (!validCharactersRegex.test(trimmedQuery)) {
       setSearchLocationError(
-        t('weather.errors.searchInvalid'),
+        'Invalid characters in search query',
       );
       return;
     }
@@ -616,11 +625,11 @@ export default function WeatherForecastPage() {
         console.log('Selected location via search:', newLocation);
         setSearchQuery('');
       } else {
-        setSearchLocationError(t('weather.errors.locationNotFound').replace('{query}', trimmedQuery));
+        setSearchLocationError(`Location "${trimmedQuery}" not found`);
       }
     } catch (error) {
       console.error('Error geocoding location:', error);
-      setSearchLocationError(t('weather.errors.searchFailed'));
+      setSearchLocationError('Failed to search location');
     } finally {
       setIsSearchingLocation(false);
     }
@@ -644,7 +653,7 @@ export default function WeatherForecastPage() {
               districtName: name,
             });
           } catch (error) {
-            setSearchLocationError(t('weather.errors.getLocationFailed'));
+            setSearchLocationError('Failed to get location name');
             setSelectedLocation({
               name: 'Current Location',
               latitude: latitude,
@@ -657,13 +666,13 @@ export default function WeatherForecastPage() {
         },
         (error) => {
           setSearchLocationError(
-            t('weather.errors.geolocationFailed'),
+            'Failed to get your location',
           );
           setIsSearchingLocation(false);
         },
       );
     } else {
-      setSearchLocationError(t('weather.errors.geolocationUnsupported'));
+      setSearchLocationError('Geolocation is not supported by your browser');
     }
   };
 
@@ -677,38 +686,38 @@ export default function WeatherForecastPage() {
   const weatherLayerConfigs = [
     {
       key: 'clouds',
-      label: t('weather.layers.clouds'),
+      label: 'Clouds',
       icon: Cloud,
       color: 'text-gray-400',
-      description: t('weather.layers.cloudCover'),
+      description: 'Cloud cover',
     },
     {
       key: 'precipitation',
-      label: t('weather.layers.precipitation'),
+      label: 'Precipitation',
       icon: CloudRain,
       color: 'text-blue-400',
-      description: t('weather.layers.rainIntensity'),
+      description: 'Rain intensity',
     },
     {
       key: 'temperature',
-      label: t('weather.layers.temperature'),
+      label: 'Temperature',
       icon: Thermometer,
       color: 'text-red-400',
-      description: t('weather.layers.tempDistribution'),
+      description: 'Temperature distribution',
     },
     {
       key: 'wind',
-      label: t('weather.layers.wind'),
+      label: 'Wind',
       icon: Wind,
       color: 'text-green-400',
-      description: t('weather.layers.windSpeed'),
+      description: 'Wind speed',
     },
     {
       key: 'pressure',
-      label: t('weather.layers.pressure'),
+      label: 'Pressure',
       icon: Gauge,
       color: 'text-purple-400',
-      description: t('weather.layers.atmPressure'),
+      description: 'Atmospheric pressure',
     },
   ];
 
@@ -727,10 +736,10 @@ export default function WeatherForecastPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-cyan-600 dark:from-white dark:via-blue-100 dark:to-cyan-100 bg-clip-text text-transparent">
-                  {t('weather.pageTitle')}
+                  Weather Forecast
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 text-xs hidden md:block">
-                  {t('weather.pageSubtitle')}
+                  Real-time weather data and forecasts
                 </p>
               </div>
             </div>
@@ -740,7 +749,7 @@ export default function WeatherForecastPage() {
                 className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border bg-green-600/20 text-green-400 border-green-500/30"
               >
                 <Wifi className="w-3 h-3 mr-1.5" />
-                {t('weather.statusOnline')}
+                Online
               </Badge>
               <Button
                 variant="ghost"
@@ -771,13 +780,13 @@ export default function WeatherForecastPage() {
               <CardHeader>
                 <CardTitle className="text-slate-900 dark:text-white flex items-center space-x-2">
                   <Search className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                  <span>{t('weather.searchLocation')}</span>
+                  <span>Search Location</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="relative">
                   <Input
-                    placeholder={t('weather.searchPlaceholder')}
+                    placeholder="Enter city or location..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyPress={(e) =>
@@ -796,7 +805,7 @@ export default function WeatherForecastPage() {
                     disabled={isSearchingLocation || !searchQuery.trim()}
                     className="w-full inline-flex items-center justify-center rounded-xl font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500/50 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/25 px-4 py-2 text-sm"
                   >
-                    <Search className="w-4 h-4 mr-2" /> {t('weather.searchButton')}
+                    <Search className="w-4 h-4 mr-2" /> Search
                   </Button>
                   <Button
                     onClick={handleGetCurrentLocation}
@@ -828,7 +837,7 @@ export default function WeatherForecastPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-slate-900 dark:text-white flex items-center space-x-2">
                     <Layers className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-                    <span>{t('weather.mapLayers')}</span>
+                    <span>Map Layers</span>
                   </CardTitle>
                   <Button
                     variant="ghost"
@@ -900,7 +909,7 @@ export default function WeatherForecastPage() {
                   <CardTitle className="text-slate-900 dark:text-white flex items-center space-x-2 truncate">
                     <Globe className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
                     <span className="truncate">
-                      {selectedLocation?.name || t('weather.interactiveMap')}
+                      {selectedLocation?.name || 'Interactive Weather Map'}
                     </span>
                   </CardTitle>
                 </div>
@@ -913,8 +922,8 @@ export default function WeatherForecastPage() {
                   className="absolute top-[78px] left-[10px] z-[1000] w-8 h-8 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 rounded-sm flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-lg"
                   aria-label={
                     isMapFullscreen
-                      ? t('weather.exitFullscreen')
-                      : t('weather.enterFullscreen')
+                      ? 'Exit fullscreen'
+                      : 'Enter fullscreen'
                   }
                 >
                   {isMapFullscreen ? (
@@ -963,7 +972,7 @@ export default function WeatherForecastPage() {
                   <CardTitle className="text-slate-900 dark:text-white flex items-center space-x-2">
                     <Leaf className="w-5 h-5 text-green-500 dark:text-white" />
                     {/* Fix: use airQuality.title directly if it is root, OR check i18 structure. */}
-                    <span>{t('airQuality.title')}</span>
+                    <span>Air Quality</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
@@ -975,16 +984,16 @@ export default function WeatherForecastPage() {
                           AQI: {legacyWeatherData.airQuality.aqi}
                         </p>
                         <p className="text-md text-slate-500 dark:text-gray-300">
-                          {t('airQuality.level')}: {t(`airQuality.${legacyWeatherData.airQuality.level}`)}
+                          Level: {legacyWeatherData.airQuality.level}
                         </p>
                       </div>
                     </div>
                     <p className="text-sm text-slate-500 dark:text-gray-400 text-right">
-                      {t('airQuality.mainPollutant')}: {legacyWeatherData.airQuality.pollutant}
+                      Main Pollutant: {legacyWeatherData.airQuality.pollutant}
                     </p>
                   </div>
                   <p className="text-sm text-slate-600 dark:text-gray-200 border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
-                    {t('airQuality.recommendation')}: {t(`airQuality.${legacyWeatherData.airQuality.recommendation}`)}
+                    Recommendation: {legacyWeatherData.airQuality.recommendation}
                   </p>
                 </CardContent>
               </Card>
@@ -994,18 +1003,18 @@ export default function WeatherForecastPage() {
                 <CardHeader>
                   <CardTitle className="text-slate-900 dark:text-white flex items-center space-x-2">
                     <Compass className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />
-                    <span>{t('weather.locationInfo')}</span>
+                    <span>Location Info</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700/30">
-                    <span className="text-slate-500 dark:text-slate-400">{t('weather.latitude')}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Latitude</span>
                     <span className="text-slate-900 dark:text-white font-medium font-mono">
                       {selectedLocation.latitude.toFixed(4)}°
                     </span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-slate-500 dark:text-slate-400">{t('weather.longitude')}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Longitude</span>
                     <span className="text-slate-900 dark:text-white font-medium font-mono">
                       {selectedLocation.longitude.toFixed(4)}°
                     </span>

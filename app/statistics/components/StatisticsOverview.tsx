@@ -34,7 +34,6 @@ import {
 } from 'recharts';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useLanguage } from '@/src/context/LanguageContext';
 
 // Assuming this data type is in a separate file
 interface StatCard {
@@ -88,7 +87,6 @@ interface StatisticsOverviewProps {
 }
 
 export default function StatisticsOverview({ statCards, chartData }: StatisticsOverviewProps) {
-  const { t } = useLanguage();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -96,13 +94,13 @@ export default function StatisticsOverview({ statCards, chartData }: StatisticsO
   const [geminiError, setGeminiError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
 
-  // Data pie chart moved here for translation
+  // Data pie chart
   const pieData = [
-    { name: t('Statistics.types.flood') || 'Flood', value: 35, color: '#06B6D4' },
-    { name: t('Statistics.types.earthquake') || 'Earthquake', value: 25, color: '#EF4444' },
-    { name: t('Statistics.types.landslide') || 'Landslide', value: 20, color: '#F59E0B' },
-    { name: t('Statistics.types.tsunami') || 'Tsunami', value: 10, color: '#10B981' },
-    { name: t('Statistics.types.other') || 'Other', value: 10, color: '#8B5CF6' },
+    { name: 'Flood', value: 35, color: '#06B6D4' },
+    { name: 'Earthquake', value: 25, color: '#EF4444' },
+    { name: 'Landslide', value: 20, color: '#F59E0B' },
+    { name: 'Tsunami', value: 10, color: '#10B981' },
+    { name: 'Other', value: 10, color: '#8B5CF6' },
   ];
 
   useEffect(() => {
@@ -114,54 +112,54 @@ export default function StatisticsOverview({ statCards, chartData }: StatisticsO
   // Ideally, this data comes from the parent component via the `statCards` prop.
   const fullStatCards: StatCard[] = [
     {
-      title: t('Statistics.overview.stats.totalIncidents'),
+      title: 'Total Incidents',
       value: '10',
-      description: t('Statistics.overview.stats.descTotalIncidents'),
+      description: 'Total reported disaster incidents',
       icon: <Activity className="w-6 h-6" />,
       color: 'cyan',
       change: 12,
       changeType: 'increase',
     },
     {
-      title: t('Statistics.overview.stats.evacuees'),
-      value: '10.470',
-      description: t('Statistics.overview.stats.descEvacuees'),
+      title: 'Evacuees',
+      value: '10,470',
+      description: 'People evacuated from affected areas',
       icon: <Users className="w-6 h-6" />,
       color: 'blue',
       change: 20,
       changeType: 'increase',
     },
     {
-      title: t('Statistics.overview.stats.casualties'),
+      title: 'Casualties',
       value: '89',
-      description: t('Statistics.overview.stats.descCasualties'),
+      description: 'Reported casualties and injuries',
       icon: <AlertCircle className="w-6 h-6" />,
       color: 'red',
       change: 5,
       changeType: 'increase',
     },
     {
-      title: t('Statistics.overview.stats.damagedInfra'),
-      value: '1.204',
-      description: t('Statistics.overview.stats.descDamagedInfra'),
+      title: 'Damaged Infrastructure',
+      value: '1,204',
+      description: 'Infrastructure units affected',
       icon: <Zap className="w-6 h-6" />,
       color: 'orange',
       change: 8,
       changeType: 'decrease',
     },
     {
-      title: t('Statistics.overview.stats.affectedAreas'),
+      title: 'Affected Areas',
       value: '78',
-      description: t('Statistics.overview.stats.descAffectedAreas'),
+      description: 'Geographic areas impacted',
       icon: <Globe className="w-6 h-6" />,
       color: 'green',
       change: 3,
       changeType: 'increase',
     },
     {
-      title: t('Statistics.overview.stats.preparedness'),
+      title: 'Preparedness Level',
       value: '85%',
-      description: t('Statistics.overview.stats.descPreparedness'),
+      description: 'Community preparedness percentage',
       icon: <Shield className="w-6 h-6" />,
       color: 'purple',
       change: 2,
@@ -291,14 +289,14 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center">
             <BarChart3 className="w-7 h-7 mr-3 text-cyan-600 dark:text-cyan-400" />
-            {t('Statistics.overview.title')}
+            Disaster Statistics Overview
           </h2>
           <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span>{t('Statistics.overview.realTime')}</span>
+            <span>Live</span>
           </div>
         </div>
-        <p className="text-slate-500 dark:text-slate-400">{t('Statistics.overview.subtitle')}</p>
+        <p className="text-slate-500 dark:text-slate-400">Real-time disaster monitoring and statistics</p>
       </motion.div>
 
       {/* Stats Grid - Enhanced with 6 cards */}
@@ -378,8 +376,8 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                   <TrendingUp className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold">{t('Statistics.overview.charts.trendTitle')}</div>
-                  <div className="text-xs text-cyan-600 dark:text-cyan-300 font-normal">{t('Statistics.overview.charts.trendSubtitle')}</div>
+                  <div className="text-lg font-bold">Incident Trends</div>
+                  <div className="text-xs text-cyan-600 dark:text-cyan-300 font-normal">Monthly incident patterns</div>
                 </div>
                 <div className="ml-auto flex items-center space-x-2">
                   <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
@@ -442,7 +440,7 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                       strokeWidth={3}
                       fillOpacity={1}
                       fill="url(#colorIncidents)"
-                      name={t('Statistics.overview.charts.incidents')}
+                      name="Incidents"
                     />
                     <Area
                       type="monotone"
@@ -451,7 +449,7 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                       strokeWidth={3}
                       fillOpacity={1}
                       fill="url(#colorSeverity)"
-                      name={t('Statistics.overview.charts.severity')}
+                      name="Severity"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -475,8 +473,8 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                   <PieChart className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold">{t('Statistics.overview.charts.distributionTitle')}</div>
-                  <div className="text-xs text-purple-600 dark:text-purple-300 font-normal">{t('Statistics.overview.charts.distributionSubtitle')}</div>
+                  <div className="text-lg font-bold">Disaster Distribution</div>
+                  <div className="text-xs text-purple-600 dark:text-purple-300 font-normal">Types of disasters reported</div>
                 </div>
                 <div className="ml-auto flex items-center space-x-2">
                   <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
@@ -560,13 +558,13 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                   <Brain className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold">{t('Statistics.overview.aiInsights.title')}</div>
-                  <div className="text-xs text-amber-600 dark:text-amber-300 font-normal">{t('Statistics.overview.aiInsights.subtitle')}</div>
+                  <div className="text-lg font-bold">AI-Powered Insights</div>
+                  <div className="text-xs text-amber-600 dark:text-amber-300 font-normal">Advanced analytics and predictions</div>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400 animate-pulse" />
-                <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">{t('Statistics.overview.aiInsights.poweredBy')}</span>
+                <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Powered by Gemini AI</span>
               </div>
             </CardTitle>
           </CardHeader>
@@ -586,15 +584,15 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-bold text-slate-800 dark:text-white group-hover/insight:text-cyan-600 dark:group-hover/insight:text-cyan-100 transition-colors">{t('Statistics.overview.aiInsights.cards.trend.title')}</h4>
+                        <h4 className="font-bold text-slate-800 dark:text-white group-hover/insight:text-cyan-600 dark:group-hover/insight:text-cyan-100 transition-colors">Trend Analysis</h4>
                         <div className="flex items-center space-x-1 text-red-500 dark:text-red-400">
                           <ArrowUpRight className="w-4 h-4" />
                           <span className="text-xs font-semibold">+15%</span>
                         </div>
                       </div>
-                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{t('Statistics.overview.aiInsights.cards.trend.desc')}</p>
+                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Incident trends over time</p>
                       <div className="mt-3 flex items-center space-x-2">
-                        <span className="px-2 py-1 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-300 text-xs rounded-full">{t('Statistics.overview.aiInsights.cards.trend.tag')}</span>
+                        <span className="px-2 py-1 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-300 text-xs rounded-full">Analytics</span>
                         <Target className="w-3 h-3 text-slate-400" />
                       </div>
                     </div>
@@ -613,15 +611,15 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-bold text-slate-800 dark:text-white group-hover/insight:text-emerald-600 dark:group-hover/insight:text-emerald-100 transition-colors">{t('Statistics.overview.aiInsights.cards.risk.title')}</h4>
+                        <h4 className="font-bold text-slate-800 dark:text-white group-hover/insight:text-emerald-600 dark:group-hover/insight:text-emerald-100 transition-colors">Risk Assessment</h4>
                         <div className="flex items-center space-x-1 text-emerald-600 dark:text-emerald-400">
                           <Shield className="w-4 h-4" />
                           <span className="text-xs font-semibold">3 Zona</span>
                         </div>
                       </div>
-                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{t('Statistics.overview.aiInsights.cards.risk.desc')}</p>
+                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">High-risk zones identified</p>
                       <div className="mt-3 flex items-center space-x-2">
-                        <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs rounded-full">{t('Statistics.overview.aiInsights.cards.risk.tag')}</span>
+                        <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs rounded-full">Risk</span>
                         <Globe className="w-3 h-3 text-slate-400" />
                       </div>
                     </div>
@@ -642,15 +640,15 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-bold text-slate-800 dark:text-white group-hover/insight:text-rose-600 dark:group-hover/insight:text-rose-100 transition-colors">{t('Statistics.overview.aiInsights.cards.education.title')}</h4>
+                        <h4 className="font-bold text-slate-800 dark:text-white group-hover/insight:text-rose-600 dark:group-hover/insight:text-rose-100 transition-colors">Education Impact</h4>
                         <div className="flex items-center space-x-1 text-rose-500 dark:text-rose-400">
                           <TrendingDown className="w-4 h-4" />
                           <span className="text-xs font-semibold">-8%</span>
                         </div>
                       </div>
-                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{t('Statistics.overview.aiInsights.cards.education.desc')}</p>
+                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Educational facilities affected</p>
                       <div className="mt-3 flex items-center space-x-2">
-                        <span className="px-2 py-1 bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 text-xs rounded-full">{t('Statistics.overview.aiInsights.cards.education.tag')}</span>
+                        <span className="px-2 py-1 bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 text-xs rounded-full">Education</span>
                         <Users className="w-3 h-3 text-slate-400" />
                       </div>
                     </div>
@@ -669,15 +667,15 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-bold text-slate-800 dark:text-white group-hover/insight:text-amber-600 dark:group-hover/insight:text-amber-100 transition-colors">{t('Statistics.overview.aiInsights.cards.integration.title')}</h4>
+                        <h4 className="font-bold text-slate-800 dark:text-white group-hover/insight:text-amber-600 dark:group-hover/insight:text-amber-100 transition-colors">System Integration</h4>
                         <div className="flex items-center space-x-1 text-amber-500 dark:text-amber-400">
                           <Activity className="w-4 h-4" />
                           <span className="text-xs font-semibold">85%</span>
                         </div>
                       </div>
-                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{t('Statistics.overview.aiInsights.cards.integration.desc')}</p>
+                      <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Data integration efficiency</p>
                       <div className="mt-3 flex items-center space-x-2">
-                        <span className="px-2 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 text-xs rounded-full">{t('Statistics.overview.aiInsights.cards.integration.tag')}</span>
+                        <span className="px-2 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 text-xs rounded-full">Integration</span>
                         <Brain className="w-3 h-3 text-slate-400" />
                       </div>
                     </div>
@@ -703,7 +701,7 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                 ) : (
                   <Target className="w-5 h-5" />
                 )}
-                <span>{isAnalyzing ? t('Statistics.overview.aiInsights.buttons.analyzing') : t('Statistics.overview.aiInsights.buttons.analyze')}</span>
+                <span>{isAnalyzing ? 'Analyzing...' : 'Analyze Data'}</span>
               </button>
               <button
                 onClick={handleExportReport}
@@ -715,7 +713,7 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                 ) : (
                   <Brain className="w-5 h-5" />
                 )}
-                <span>{isExporting ? t('Statistics.overview.aiInsights.buttons.exporting') : t('Statistics.overview.aiInsights.buttons.export')}</span>
+                <span>{isExporting ? 'Exporting...' : 'Export Report'}</span>
               </button>
             </motion.div>
 
@@ -729,7 +727,7 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
               >
                 <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center">
                   <Lightbulb className="w-6 h-6 mr-3 text-amber-500 dark:text-amber-400" />
-                  {t('Statistics.overview.aiInsights.resultTitle')}
+                  AI Analysis Results
                 </h3>
                 {geminiError ? (
                   <p className="text-red-400 font-medium">{geminiError}</p>

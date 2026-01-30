@@ -27,9 +27,6 @@ import { useAlertCount } from '@/components/contexts/AlertCountContext';
 import { CommandMenu } from './CommandMenu';
 import { SearchTrigger } from './SearchTrigger';
 
-import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { useLanguage } from '@/src/context/LanguageContext';
-
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -38,7 +35,6 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle, isMenuOpen }: HeaderProps) {
   const { theme, setTheme } = useTheme();
-  const { t } = useLanguage();
   const [isCommandOpen, setCommandOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -88,7 +84,7 @@ export function Header({ onMenuToggle, isMenuOpen }: HeaderProps) {
                 className="flex items-center w-full px-3 py-2 text-sm text-muted-foreground bg-transparent border border-border rounded-lg"
               >
                 <Search className="h-4 w-4 mr-3" />
-                <span className="flex-grow text-left">{t('common.searchPlaceholder')}</span>
+                <span className="flex-grow text-left">Search floods, weather, alerts...</span>
               </button>
             </div>
           </div>
@@ -114,9 +110,10 @@ export function Header({ onMenuToggle, isMenuOpen }: HeaderProps) {
                 variant="ghost"
                 size="icon"
                 onClick={onMenuToggle}
-                className="md:hidden"
+                className="md:hidden h-12 w-12 p-3 touch-manipulation active:bg-muted"
+                onTouchStart={(e) => e.preventDefault()}
               >
-                {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </Button>
             )}
 
@@ -134,9 +131,9 @@ export function Header({ onMenuToggle, isMenuOpen }: HeaderProps) {
                   />
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-xl font-bold gradient-text">{t('common.risqmap')}</h1>
+                  <h1 className="text-xl font-bold gradient-text">RisqMap</h1>
                   <p className="text-xs text-muted-foreground">
-                    {t('common.floodDetectionSystem')}
+                    Flood Detection System
                   </p>
                 </div>
               </motion.div>
@@ -177,10 +174,6 @@ export function Header({ onMenuToggle, isMenuOpen }: HeaderProps) {
             >
               <ThemeIcon size={20} />
             </Button>
-
-            <LanguageSwitcher />
-
-
 
             {/* Notifications */}
             <Link href="/warning" passHref>
