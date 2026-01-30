@@ -54,7 +54,22 @@ export interface OpenMeteoCurrent {
 export interface CombinedWeatherData {
   current: OpenMeteoCurrent | null;
   daily: Array<{ dt: string; temp_max?: number; temp_min?: number; precipitation?: number }>;
-  hourly?: Array<{ timestamp: string; precipitation: number }>;
+  hourly?: Array<{ 
+    timestamp: string; 
+    precipitation: number;
+    rain?: number;
+    temperature?: number;
+    apparent_temperature?: number;
+    humidity?: number;
+    dewpoint?: number;
+    windSpeed?: number;
+    windDirection?: number;
+    windGusts?: number;
+    pressure?: number;
+    visibility?: number;
+    cloudcover?: number;
+    weathercode?: number;
+  }>;
 }
 
 export interface WeatherData {

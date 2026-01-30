@@ -3,6 +3,9 @@
 
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering since we use request.url
+export const dynamic = 'force-dynamic';
+
 const FEMA_API_BASE = 'https://gis.fema.gov/arcgis/rest/services/NSS/OpenShelters/MapServer/0/query';
 
 export async function GET(request: Request) {

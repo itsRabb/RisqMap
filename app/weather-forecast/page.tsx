@@ -528,21 +528,29 @@ export default function WeatherForecastPage() {
             : null;
 
           const mappedDaily = Array.isArray(om.daily)
-            ? om.daily.map((d: any) => ({
-                dt: d.dt ? Math.floor(new Date(d.dt).getTime() / 1000) : undefined,
-                temp: { max: d.temp_max ?? undefined, min: d.temp_min ?? undefined },
-                temp_max: d.temp_max ?? undefined,
-                temp_min: d.temp_min ?? undefined,
-                main: {
+            ? om.daily.map((d: any, index: number) => {
+                // Get weathercode from hourly data at noon (12pm) for this day
+                // hourly array has 24 hours per day, so index * 24 + 12 gives us noon
+                const noonIndex = index * 24 + 12;
+                const weathercodeAtNoon = om.hourly?.[noonIndex]?.weathercode;
+                
+                return {
+                  dt: d.dt ? Math.floor(new Date(d.dt).getTime() / 1000) : undefined,
+                  temp: { max: d.temp_max ?? undefined, min: d.temp_min ?? undefined },
                   temp_max: d.temp_max ?? undefined,
                   temp_min: d.temp_min ?? undefined,
-                },
-                weather: [{
-                  description: 'N/A',
-                  icon: undefined,
-                }],
-                precipitation: d.precipitation,
-              }))
+                  main: {
+                    temp_max: d.temp_max ?? undefined,
+                    temp_min: d.temp_min ?? undefined,
+                  },
+                  weather: [{
+                    id: mapOpenMeteoCodeToOWId(weathercodeAtNoon),
+                    description: mapOpenMeteoCodeToDescription(weathercodeAtNoon),
+                    icon: undefined,
+                  }],
+                  precipitation: d.precipitation,
+                };
+              })
             : [];
 
           const mapped = { current: mappedCurrent, daily: mappedDaily, hourly: om.hourly || [] };

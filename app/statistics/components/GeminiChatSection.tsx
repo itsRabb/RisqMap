@@ -147,7 +147,7 @@ export default function GeminiChatSection({
         onClick={() => setIsOpen(true)}
         className="fixed bottom-4 right-4 z-40 bg-slate-800 dark:bg-slate-900 hover:bg-slate-700 dark:hover:bg-slate-800 text-white p-3 rounded-full shadow-2xl transition-all duration-300"
       >
-        <Image src="/roborisqmap.png" alt="RisqMap AI Assistant" width={40} height={40} className="rounded-full" />
+        <Bot className="w-6 h-6" />
         <motion.div
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}

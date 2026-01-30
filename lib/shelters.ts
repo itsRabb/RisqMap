@@ -147,10 +147,22 @@ export async function fetchFEMAShelters(options?: {
     
     console.log('[FEMA Shelters] Fetching from proxy:', url);
     
+    // Prepare headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add authorization header for Supabase Edge Functions
+    if (supabaseUrl) {
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      if (anonKey) {
+        headers['Authorization'] = `Bearer ${anonKey}`;
+        headers['apikey'] = anonKey;
+      }
+    }
+    
     const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       next: { revalidate: 300 }, // Cache for 5 minutes
     });
     
