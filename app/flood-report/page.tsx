@@ -704,23 +704,15 @@ if (!predictionResponse.ok) {
             </h3>
             <div className="space-y-2 text-xs sm:text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-600 dark:text-slate-400">Local Emergency Management:</span>
+                <span className="text-slate-600 dark:text-slate-400">Emergency Services (Police, Fire, EMS):</span>
                 <span className="text-slate-900 dark:text-white font-medium">
-                  {' '}
-                  911 / (212) 555-0100
+                  911
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600 dark:text-slate-400">Fire Department:</span>
+                <span className="text-slate-600 dark:text-slate-400">Suicide & Crisis Lifeline:</span>
                 <span className="text-slate-900 dark:text-white font-medium">
-                  113 / (021) 386 5555
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-600 dark:text-slate-400">State Police / Local Police:</span>
-                <span className="text-slate-900 dark:text-white font-medium">
-                  {' '}
-                  911 / (212) 555-0199
+                  988
                 </span>
               </div>
             </div>

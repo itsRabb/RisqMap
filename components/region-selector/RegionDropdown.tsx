@@ -518,7 +518,7 @@ export function RegionDropdown({
               <RegionSelectField
                 selectedValue={selectedProvinceCode}
                 onValueChange={handleProvinceChange}
-                placeholder="Province"
+                placeholder="State"
                 loading={loadingProvinces}
                 disabled={loadingProvinces}
                 data={provinces}
@@ -533,7 +533,7 @@ export function RegionDropdown({
               <RegionSelectField
                 selectedValue={selectedRegencyCode}
                 onValueChange={handleRegencyChange}
-                placeholder="City/Regency"
+                placeholder="City"
                 loading={loadingRegencies}
                 disabled={!selectedProvinceCode || loadingRegencies}
                 data={regencies}
@@ -543,21 +543,6 @@ export function RegionDropdown({
                 currentDisplayName={displayRegencyName}
                 isOpen={activeField === 'regency'}
                 onOpenChange={(open) => setActiveField(open ? 'regency' : null)}
-              />
-
-              <RegionSelectField
-                selectedValue={selectedDistrictCode}
-                onValueChange={handleDistrictChange}
-                placeholder="District"
-                loading={loadingDistricts}
-                disabled={!selectedRegencyCode || loadingDistricts}
-                data={districts}
-                icon={<MapPin className="h-4 w-4 text-blue-500 dark:text-blue-400" />}
-                valueKey="sub_district_code"
-                nameKey="sub_district_name"
-                currentDisplayName={displayDistrictName}
-                isOpen={activeField === 'district'}
-                onOpenChange={(open) => setActiveField(open ? 'district' : null)}
               />
             </div>
 

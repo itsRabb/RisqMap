@@ -53,28 +53,42 @@ interface NewsReport {
 
 const fetchNewsAndReports = async (): Promise<NewsReport[]> => {
   try {
-    // Fetch real weather/disaster news from NewsAPI
-    // Using 'weather', 'flood', 'disaster' keywords for relevant articles
-    const response = await fetch(
-      `https://newsapi.org/v2/everything?q=(weather OR flood OR disaster OR storm OR hurricane) AND (United States OR US)&language=en&sortBy=publishedAt&pageSize=6`,
-      {
-        headers: {
-          'X-Api-Key': process.env.NEXT_PUBLIC_NEWS_API_KEY || '',
-        },
-      }
-    );
+    const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY;
+    
+    if (!apiKey) {
+      console.error('[Warning Page] ❌ NEXT_PUBLIC_NEWS_API_KEY is not set!');
+      throw new Error('NewsAPI key is missing');
+    }
+    
+    console.log('[Warning Page] 📰 Fetching news from NewsAPI...');
+    
+    // Fetch real weather/disaster news from NewsAPI TOP HEADLINES
+    // Using top-headlines for current breaking news (like the current snowstorm)
+    const query = encodeURIComponent("weather OR storm OR flood OR disaster");
+
+    const url = `https://newsapi.org/v2/everything?qInTitle=${query}&domains=weather.com,accuweather.com,apnews.com,reuters.com,cnn.com,nytimes.com,foxweather.com&language=en&sortBy=publishedAt&pageSize=6&apiKey=${apiKey}`;
+
+
+    
+    const response = await fetch(url);
 
     if (!response.ok) {
-      console.warn('[Warning Page] NewsAPI failed, using fallback');
-      throw new Error('NewsAPI request failed');
+      const errorText = await response.text();
+      console.error('[Warning Page] ❌ NewsAPI HTTP error:', response.status, errorText);
+      throw new Error(`NewsAPI request failed: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('[Warning Page] 📊 NewsAPI response:', { status: data.status, totalResults: data.totalResults, articlesCount: data.articles?.length });
     
     if (data.status === 'ok' && data.articles) {
-      return data.articles
-        .filter((article: any) => article.title && article.url) // Filter out null/removed articles
-        .slice(0, 4) // Limit to 4 articles
+      const filteredArticles = data.articles
+        .filter((article: any) => article.title && article.url && article.title !== '[Removed]');
+      
+      console.log(`[Warning Page] ✅ Found ${filteredArticles.length} valid articles`);
+      
+      return filteredArticles
+        .slice(0, 6) // Limit to 6 articles
         .map((article: any, index: number) => ({
           id: `news-${index}`,
           title: article.title,
@@ -85,9 +99,10 @@ const fetchNewsAndReports = async (): Promise<NewsReport[]> => {
         }));
     }
     
-    throw new Error('No articles found');
-  } catch (error) {
-    console.error('[Warning Page] Error fetching news:', error);
+    console.error('[Warning Page] ❌ NewsAPI returned invalid response:', data);
+    throw new Error(`No articles found: ${data.message || 'Unknown error'}`);
+  } catch (error: any) {
+    console.error('[Warning Page] ❌ Error fetching news:', error.message);
     // Fallback to NOAA weather stories as backup
     return [
       { 
@@ -186,12 +201,44 @@ export default function AlertsPage() {
     try {
       const reports = await fetchNewsAndReports();
       setNewsReports(reports);
-      // Mock summary
-      const summaries = reports.reduce((acc, report) => {
-        acc[report.id] = `Summary of: ${report.title}`;
+      
+      // Generate real AI summaries using Gemini
+      const summaryPromises = reports.map(async (report) => {
+        try {
+          const response = await fetch('/api/gemini-alerts', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              alertData: {
+                reason: report.title,
+                location: report.source,
+                timestamp: new Date(report.timestamp).toLocaleString('en-US'),
+                newsContent: report.content,
+                requestType: 'news_summary'
+              }
+            })
+          });
+          
+          if (!response.ok) throw new Error('Gemini API failed');
+          
+          const data = await response.json();
+          return { id: report.id, summary: data.analysis || data.answer || report.content.slice(0, 150) + '...' };
+        } catch (err) {
+          console.error(`[Warning Page] Failed to summarize ${report.id}:`, err);
+          // Fallback to truncated content
+          return { id: report.id, summary: report.content.slice(0, 150) + '...' };
+        }
+      });
+      
+      const summaries = await Promise.all(summaryPromises);
+      const summaryMap = summaries.reduce((acc, { id, summary }) => {
+        acc[id] = summary;
         return acc;
       }, {} as { [key: string]: string });
-      setGeminiNewsSummary(summaries);
+      
+      setGeminiNewsSummary(summaryMap);
     } catch (err: any) {
       setNewsError(err.message || 'Failed to load news');
     } finally {

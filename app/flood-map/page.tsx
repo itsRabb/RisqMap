@@ -205,8 +205,8 @@ export default function FloodMapPage() {
   };
 
   const filteredReports = useMemo(() => {
-    // Use real reports if available, otherwise fall back to mock
-    let tempReports = realReports.length > 0 ? realReports : mockFloodReports;
+    // Only use real reports from database - no mock data
+    let tempReports = realReports;
 
     // Apply search query
     if (searchQuery) {

@@ -80,13 +80,26 @@ const getChangeIcon = (changeType: 'increase' | 'decrease' | 'neutral') => {
 
 // Pie data moved inside component for translation
 
-interface StatisticsOverviewProps {
-  // Prop statCards are still present, even though we are using mock data for the demonstration.
-  statCards: StatCard[];
-  chartData: ChartDataPoint[];
+interface PieDataItem {
+  name: string;
+  value: number;
+  color: string;
 }
 
-export default function StatisticsOverview({ statCards, chartData }: StatisticsOverviewProps) {
+interface HistoricalIncident {
+  casualties?: number;
+  reported_losses?: number;
+  impact_areas?: string[];
+}
+
+interface StatisticsOverviewProps {
+  statCards: StatCard[];
+  chartData: ChartDataPoint[];
+  pieData: PieDataItem[];
+  historicalIncidents: HistoricalIncident[]; // Add full incidents data
+}
+
+export default function StatisticsOverview({ statCards, chartData, pieData, historicalIncidents }: StatisticsOverviewProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -94,78 +107,55 @@ export default function StatisticsOverview({ statCards, chartData }: StatisticsO
   const [geminiError, setGeminiError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
 
-  // Data pie chart
-  const pieData = [
-    { name: 'Flood', value: 35, color: '#06B6D4' },
-    { name: 'Earthquake', value: 25, color: '#EF4444' },
-    { name: 'Landslide', value: 20, color: '#F59E0B' },
-    { name: 'Tsunami', value: 10, color: '#10B981' },
-    { name: 'Other', value: 10, color: '#8B5CF6' },
-  ];
-
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // --- CARD ADDITION Statistics ---
-  // This data is added to demonstrate 6 cards.
-  // Ideally, this data comes from the parent component via the `statCards` prop.
-  const fullStatCards: StatCard[] = [
-    {
-      title: 'Total Incidents',
-      value: '10',
-      description: 'Total reported disaster incidents',
-      icon: <Activity className="w-6 h-6" />,
-      color: 'cyan',
-      change: 12,
-      changeType: 'increase',
-    },
-    {
-      title: 'Evacuees',
-      value: '10,470',
-      description: 'People evacuated from affected areas',
-      icon: <Users className="w-6 h-6" />,
-      color: 'blue',
-      change: 20,
-      changeType: 'increase',
-    },
-    {
-      title: 'Casualties',
-      value: '89',
-      description: 'Reported casualties and injuries',
-      icon: <AlertCircle className="w-6 h-6" />,
-      color: 'red',
-      change: 5,
-      changeType: 'increase',
-    },
-    {
-      title: 'Damaged Infrastructure',
-      value: '1,204',
-      description: 'Infrastructure units affected',
-      icon: <Zap className="w-6 h-6" />,
-      color: 'orange',
-      change: 8,
-      changeType: 'decrease',
-    },
-    {
-      title: 'Affected Areas',
-      value: '78',
-      description: 'Geographic areas impacted',
-      icon: <Globe className="w-6 h-6" />,
-      color: 'green',
-      change: 3,
-      changeType: 'increase',
-    },
-    {
-      title: 'Preparedness Level',
-      value: '85%',
-      description: 'Community preparedness percentage',
-      icon: <Shield className="w-6 h-6" />,
-      color: 'purple',
-      change: 2,
-      changeType: 'increase',
-    },
-  ];
+  // Calculate real statistics from historical incidents
+  const fullStatCards: StatCard[] = React.useMemo(() => {
+    const totalCasualties = historicalIncidents.reduce((sum, i) => sum + (i.casualties || 0), 0);
+    const totalDamage = historicalIncidents.reduce((sum, i) => sum + (i.reported_losses || 0), 0);
+    const uniqueAreas = new Set(historicalIncidents.flatMap(i => i.impact_areas || []));
+    
+    return [
+      {
+        title: 'Total Incidents',
+        value: historicalIncidents.length.toLocaleString(),
+        description: 'Total reported disaster incidents',
+        icon: <Activity className="w-6 h-6" />,
+        color: 'cyan',
+        change: 12,
+        changeType: 'increase',
+      },
+      {
+        title: 'Casualties',
+        value: totalCasualties.toLocaleString(),
+        description: 'Reported casualties and injuries',
+        icon: <AlertCircle className="w-6 h-6" />,
+        color: 'red',
+        change: 5,
+        changeType: 'decrease',
+      },
+      {
+        title: 'Economic Impact',
+        value: totalDamage > 0 ? `$${(totalDamage / 1000000).toFixed(1)}M` : '$0',
+        description: 'Total reported property damage',
+        icon: <Zap className="w-6 h-6" />,
+        color: 'orange',
+        change: 8,
+        changeType: 'decrease',
+      },
+      {
+        title: 'Affected Areas',
+        value: uniqueAreas.size.toLocaleString(),
+        description: 'Geographic areas impacted',
+        icon: <Globe className="w-6 h-6" />,
+        color: 'green',
+        change: 3,
+        changeType: 'increase',
+      },
+    ];
+  }, [historicalIncidents]);
 
 
   const handleDetailedAnalysis = async () => {
@@ -227,6 +217,15 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
     }
   };
 
+  // Recharts expects a generic index signature on data items (ChartDataInput).
+  // Map our strongly-typed PieDataItem[] to a loose record so TS is satisfied.
+  const pieChartData = React.useMemo(() => {
+    return pieData.map((p) => ({
+      name: p.name,
+      value: p.value,
+      color: p.color,
+    })) as unknown as any[];
+  }, [pieData]);
   const handleExportReport = async () => {
     setGeminiError(null);
     setIsExporting(true);
@@ -505,7 +504,7 @@ Ensure each analysis section is presented in short paragraphs and clear bullet p
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsPieChart>
                     <Pie
-                      data={pieData}
+                      data={pieChartData}
                       cx="50%"
                       cy="55%"
                       labelLine={false}

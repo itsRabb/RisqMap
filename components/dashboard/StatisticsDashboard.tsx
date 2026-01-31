@@ -71,21 +71,28 @@ const DATA_KEYS = ['amount', 'resolved'];
 
 const StatisticsDashboard = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [chartData, setChartData] = useState<ChartData>({ line: [], bar: [], pie: [] });
-  const [masterData, setMasterData] = useState(() => generateRandomData(90));
+  const [floodReports, setFloodReports] = useState<any[]>([]);
 
-  // Effect to regenerate masterData every 24 hours
+  // Fetch real flood reports from database
   useEffect(() => {
-    const refreshInterval = setInterval(
-      () => {
-        setMasterData(generateRandomData(90));
-        console.log('Master data refreshed!');
-      },
-      24 * 60 * 60 * 1000,
-    ); // 24 hours in milliseconds
-
-    return () => clearInterval(refreshInterval);
+    const fetchFloodReports = async () => {
+      try {
+        const response = await fetch('/api/report');
+        if (response.ok) {
+          const data = await response.json();
+          setFloodReports(data);
+        } else {
+          console.error('Failed to fetch flood reports');
+          setFloodReports([]);
+        }
+      } catch (error) {
+        console.error('Error fetching flood reports:', error);
+        setFloodReports([]);
+      }
+    };
+    fetchFloodReports();
   }, []);
 
   useEffect(() => {
@@ -96,33 +103,28 @@ const StatisticsDashboard = () => {
       );
       const isHours = selectedTimeRange.includes('h');
       const now = new Date();
-      let dataToProcess;
+      
+      // Filter flood reports by time range
+      const cutoff = isHours ? subDays(now, days / 24) : subDays(now, days);
+      const dataToProcess = floodReports.filter((report) => 
+        new Date(report.created_at) >= cutoff
+      );
 
-      if (selectedTimeRange === '30d') {
-        dataToProcess = generateRandomData(30); // Generate fresh mock data for 30 days
-      } else if (selectedTimeRange === '90d') {
-        dataToProcess = generateRandomData(90); // Generate fresh mock data for 90 days
-      } else {
-        // For 24h and 7d, filter from masterData as before
-        const cutoff = isHours ? subDays(now, days / 24) : subDays(now, days);
-        dataToProcess = masterData.filter((d) => new Date(d.date) >= cutoff);
-      }
-
-      // Process data for charts
+      // Process data for charts - group by date
       const line = normalizeSeries(
         dataToProcess
           .reduce((acc, curr) => {
-            const day = format(parseISO(curr.date), 'yyyy-MM-dd');
+            const day = format(parseISO(curr.created_at), 'yyyy-MM-dd');
             const existing = acc.find((item) => item.date === day);
             if (existing) {
-              existing.amount += curr.report ?? 0;
-              existing.resolved += curr.resolved ?? 0;
+              existing.amount += 1;
+              existing.resolved += curr.verified_at ? 1 : 0;
             } else {
               acc.push({
                 date: day,
-                day: format(parseISO(curr.date), 'eee'),
-                amount: curr.report ?? 0,
-                resolved: curr.resolved ?? 0,
+                day: format(parseISO(curr.created_at), 'eee'),
+                amount: 1,
+                resolved: curr.verified_at ? 1 : 0,
               });
             }
             return acc;
@@ -133,20 +135,22 @@ const StatisticsDashboard = () => {
         DATA_KEYS,
       ) as ChartRow[];
 
+      // Group by location/region
       const bar = normalizeSeries(
         dataToProcess.reduce((acc, curr) => {
-          const existing = acc.find((item) => item.name === curr.region);
+          const location = curr.location || 'Unknown';
+          const existing = acc.find((item) => item.name === location);
           if (existing) {
-            existing.amount += curr.report ?? 0;
+            existing.amount += 1;
           } else {
-            acc.push({ name: curr.region, amount: curr.report ?? 0 });
+            acc.push({ name: location, amount: 1 });
           }
           return acc;
         }, [] as ChartRow[]),
         DATA_KEYS,
       ) as ChartRow[];
 
-      console.log('[Chart] range=', selectedTimeRange, 'len=', Array.isArray(line) ? line.length : 0);
+      console.log('[Chart] range=', selectedTimeRange, 'reports=', dataToProcess.length);
       if (line.length > 0) {
         console.table(line.slice(0, 3));
       }
@@ -156,7 +160,7 @@ const StatisticsDashboard = () => {
     };
 
     fetchData();
-  }, [selectedTimeRange, masterData]); // Add masterData to dependency array
+  }, [selectedTimeRange, floodReports]); // Depend on floodReports
 
   const COLORS = [
     '#06b6d4',

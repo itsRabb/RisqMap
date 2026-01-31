@@ -97,6 +97,38 @@ export default function StatistikPage() {
     setChartData(generateChartData(filteredByDate));
   }, [startDate, endDate, historicalIncidents]);
 
+  // Calculate disaster distribution from real data
+  const pieData = React.useMemo(() => {
+    const typeCounts: { [key: string]: number } = {};
+    historicalIncidents.forEach(incident => {
+      const type = incident.type || 'Other';
+      typeCounts[type] = (typeCounts[type] || 0) + 1;
+    });
+    
+    const colorMap: { [key: string]: string } = {
+      'Flood': '#06B6D4',
+      'Thunderstorm Wind': '#3B82F6',
+      'Hail': '#8B5CF6',
+      'Tornado': '#EF4444',
+      'Hurricane': '#DC2626',
+      'Winter Weather': '#60A5FA',
+      'Heavy Rain': '#0EA5E9',
+      'Flash Flood': '#06B6D4',
+      'Drought': '#F59E0B',
+      'Wildfire': '#F97316',
+      'Other': '#6B7280',
+    };
+    
+    return Object.entries(typeCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8) // Top 8 types
+      .map(([name, value]) => ({
+        name,
+        value,
+        color: colorMap[name] || '#6B7280',
+      }));
+  }, [historicalIncidents]);
+
   // Stat cards
   const statCards: StatCard[] = [
     {
@@ -344,7 +376,12 @@ export default function StatistikPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <StatistikOverview statCards={statCards} chartData={chartData} />
+              <StatistikOverview 
+                statCards={statCards} 
+                chartData={chartData} 
+                pieData={pieData}
+                historicalIncidents={historicalIncidents}
+              />
             </motion.div>
           )}
 
